@@ -1,5 +1,5 @@
 
-def text(value, **kwargs):
+def text(*args, **kwargs, _value=None):
 	processed_value = value
 	# regex
 	# kwargs conditions
