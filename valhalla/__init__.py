@@ -1,78 +1,91 @@
 from functools import partial
 
-def schema():
-	return type('schema', (), {
-		'__getattribute__': _add_field,
-		'validate': _validate_schema
-	})
+from . import filters
 
-def _field():
-	return type('field', (), {
-		'_schema': None,
-		'_original_value': None,
-		'_value': None,
-		'_required': False,
-		'_alternate_name': None,
-		'_filters': [],
-		'__call__': _setup_field
-		'__getattribute__': _add_filter
-	})
+class ValidationError(Exception): pass
 
-def _filter():
-	return type('filter', (), {
-		'_field': None,
-		'_validation_fxn': None,
-		'__call__': _setup_filter
-	})
+class Schema(object):
 
+	def __init__(self):
+		self._fields = []
 
-def _validate_schema(schema, data_dict, **kwargs):
-	for field_name, input_value in data_dict.iteritems():
-		field = getattr(schema, field_name)
-		if not field:
-			continue # upgrade this later perhaps to store skipped values
-		field._original_value = f._value = input_value
+	def __getattr__(self, attr):
+		return self.add_field(attr, Field(self))
 
-		for f in field._filters:
-			field._value = f._validation_fxn(_value=field._value)
+	def add_field(self, name, field):
+		self._fields[name] = field
+		setattr(self, name, field)
+		return field
 
+	def validate(self, data_dict, **kwargs):
+		for field_name, input_value in data_dict.iteritems():
+			try:
+				field = self._fields[field_name]
+			except KeyError:
+				continue
+			
+			field.reset(input_value)
+			field.validate()
 
+class Field(object):
 
-def _add_field(schema, field_name):
-	f = _field()
-	f._schema = schema
-	setattr(schema, field_name, f)
-	#return f
+	def __init__(self, schema):
+		self._schema = schema
+		self._original_value = None
+		self._value = None
+		self._filters = []
+		self._valid = False
+		self._errors = []
 
-def _setup_field(field, *args, **kwargs):
-	option_map = {
-		'_required': 'req',
-		'_alternate_name': 'alt',
-	}
+		self._required = False
+		self._alternate_name = None
+
+	def reset(self, value=None):
+		self._valid = False
+		self._errors = []
+		self._original_value = self._value = value
+
+	def validate(self):
+		try:
+			for f in self._filters:
+				self._value = f.run(self._value)
+		except ValidationError as e:
+			self._valid = False
+			self._errors.append(e.message)
+
+	def __call__(self, *args, **kwargs):
+		option_alias_map = {
+			'req': '_required',
+			'alt': '_alternate_name',
+		}
 	
-	for attr, opt in option_map.iteritems():
-		setattr(field, attr, kwargs.get(opt))
+		for k, v in kwargs.iteritems():
+			if k in option_alias_map:
+				setattr(self, option_alias_map[k], v)
 
-	if field._alternate_name:
-		setattr(field._schema, field._alternate_name, field)
+		if self._alternate_name:
+			self._schema.add_field(self._alternate_name, self)
 
-def _add_filter(field, filter_name):
-	from . import filters
-	def _search_module(m):
-		return getattr(m, filter_name, False)
-	try:
-		fxn = filter([_search_module(m) for m in filters])[0]
-		f = _filter()
-		f._validation_fxn = fxn
-		f._field = field
-		field._filters.append(f)
-		return f
-	finally:
-		raise RuntimeError('Filter %s is undefined' % filter_name)
+	def __getattr__(self, name):
+		def _search_module(m):
+			return getattr(m, filter_name, False)
+		try:
+			fxn = filter([_search_module(m) for m in filters])[0]
+			f = Filter(self, fxn)
+			self._filters.append(f)
+			return f
+		finally:
+			raise RuntimeError('Filter %s is undefined' % filter_name)
 
-def _setup_filter(f1lter, *args, **kwargs):
-	f1lter._validation_fxn = partial(f1lter._validation_fxn, *args, **kwargs)
-	return f1lter._field
+class Filter(object):
 
-# s = schema()
-# s.first_name.text(min_length=3)
+	def __init__(self, field, fxn):
+		self._field = field
+		self._validation_fxn = fxn
+
+	def run(self, value):
+		return self._validation_fxn(_value=value)
+
+	def __call__(self, *args, **kwargs):
+		self._validation_fxn = partial(self._validation_fxn, *args, **kwargs)
+		return self._field
