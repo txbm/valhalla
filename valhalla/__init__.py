@@ -1,16 +1,20 @@
 from functools import partial
-
-from . import filters
+from filters import lookup
 
 class ValidationError(Exception): pass
 
 class Schema(object):
 
 	def __init__(self):
-		self._fields = []
+		self._fields = {}
+		self._valid = False
 
 	def __getattr__(self, attr):
 		return self.add_field(attr, Field(self))
+
+	@property
+	def valid(self):
+		return self._valid
 
 	def add_field(self, name, field):
 		self._fields[name] = field
@@ -18,15 +22,15 @@ class Schema(object):
 		return field
 
 	def validate(self, data_dict, **kwargs):
-		for field_name, input_value in data_dict.iteritems():
-			try:
-				field = self._fields[field_name]
-			except KeyError:
-				continue
-			
-			field.reset(input_value)
-			field.validate()
+		self._valid = True
+		for name, field in self._fields.iteritems():
+			if not field.validate(data_dict.get(name)):
+				self._valid = False
 
+	def reset(self):
+		[f.reset() for n, f in self._fields.iteritems()]
+		self._valid = False
+		
 class Field(object):
 
 	def __init__(self, schema):
@@ -40,18 +44,48 @@ class Field(object):
 		self._required = False
 		self._alternate_name = None
 
-	def reset(self, value=None):
+		self._ran = False
+
+	@property
+	def valid(self):
+		return self._valid
+
+	@property
+	def errors(self):
+		return self._errors
+
+	@property
+	def result(self):
+		return (self._original_value, self._value)
+
+	def reset(self):
+		self._ran = False
 		self._valid = False
 		self._errors = []
-		self._original_value = self._value = value
+		self._original_value = self._value = None
 
-	def validate(self):
+	def validate(self, value):
+		if self._ran:
+			return
+
+		self._original_value = self._value = value
+		
 		try:
 			for f in self._filters:
 				self._value = f.run(self._value)
 		except ValidationError as e:
 			self._valid = False
 			self._errors.append(e.message)
+		else:
+			self._valid = True
+
+		self._check_options()
+		return self._valid
+
+	def _check_options(self):
+		if self._value is None and self._required:
+			self._errors.append('This field is required.')
+			self._valid = False
 
 	def __call__(self, *args, **kwargs):
 		option_alias_map = {
@@ -66,16 +100,15 @@ class Field(object):
 		if self._alternate_name:
 			self._schema.add_field(self._alternate_name, self)
 
+		return self
+
 	def __getattr__(self, name):
-		def _search_module(m):
-			return getattr(m, filter_name, False)
-		try:
-			fxn = filter([_search_module(m) for m in filters])[0]
-			f = Filter(self, fxn)
-			self._filters.append(f)
-			return f
-		finally:
-			raise RuntimeError('Filter %s is undefined' % filter_name)
+		fxn = lookup(name)
+		if not fxn:
+			raise RuntimeError('Filter %s is undefined' % name)
+		f = Filter(self, fxn)
+		self._filters.append(f)
+		return f
 
 class Filter(object):
 
