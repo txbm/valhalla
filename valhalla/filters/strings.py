@@ -1,5 +1,4 @@
 import re
-from collections import namedtuple
 
 from .. import ValidationError
 
@@ -12,8 +11,6 @@ _regexes = {
 	'numeric': re.compile(r'\d*', re.IGNORECASE),
 	'dash_under_space': re.compile (r'[\-_\s]+', re.IGNORECASE)
 }
-
-_disable_prehook = []
 
 def _prehook(*args, **kwargs):
 	value = kwargs.get('_value')

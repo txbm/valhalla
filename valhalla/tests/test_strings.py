@@ -1,5 +1,4 @@
 from nose.tools.trivial import assert_equals, assert_true, assert_false
-from nose.tools.nontrivial import with_setup
 
 from .. import Schema
 

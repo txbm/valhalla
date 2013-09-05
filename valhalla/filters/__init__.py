@@ -1,16 +1,18 @@
 from importlib import import_module
 
 __all__ = [
-	'strings'
+	'strings',
+	'numerical'
 ]
 
 def lookup(name):
 	mod, pre, post = [None for i in xrange(3)]
-	try:
-		for m in __all__:
-			mod_name = 'valhalla.filters.%s' % m
-			mod = import_module(mod_name)
-	except ImportError: pass
+	
+	for m in __all__:
+		mod_name = 'valhalla.filters.%s' % m
+		mod = import_module(mod_name)
+		if hasattr(mod, name):
+			break
 	
 	try:
 		pre = mod._prehook
