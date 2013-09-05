@@ -4,14 +4,14 @@ from . import strings
 from .. import ValidationError
 
 _regexes = {
-	'email_address': re.compile(r'^[a-z0-9\._\+%-]+@[a-z0-9\.-]+(\.[A-Z]{2,4})+$'),
+	'email_address': re.compile(r'^[a-z0-9\._\+%-]+@[a-z0-9\.-]+(\.[A-Z]{2,4})+$', re.IGNORECASE),
 	'ipv4': re.compile(r'^([0-9]{1,3}\.){3}[0-9]{1,3}$')
 }
 
 # debating breaking ALL inter-module dependencies, 
 # including this seemingly innocuous reference.
 def _prehook(*args, **kwargs):
-	return strings._prehook(kwargs.get('_value'))
+	return strings._prehook(_value=kwargs.get('_value'))
 
 def email(*args, **kwargs):
 	value = kwargs.get('_value')
