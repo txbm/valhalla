@@ -22,8 +22,8 @@ def test_field():
 	}
 	s.validate(d)
 	assert_true(s.valid)
-	assert_equals(s.other_name.result[0], 'Test Value A')
-	assert_equals(s.second_field.result[0], 'Test Value A') # because this should not have been run twice
+	assert_equals(s.other_name.result, 'Test Value A')
+	assert_equals(s.second_field.result, 'Test Value A') # because this should not have been run twice
 	s.reset()
 	assert_false(s.valid)
 	d = {'total_fail': 'will not work'}
@@ -37,24 +37,20 @@ def test_filter():
 	s = Schema('Test Schema')
 	s.first_name.text()
 	s.last_name.text(min_len=1, max_len=10)
-
 	d = {
 		'first_name': 'Jack',
 		'last_name': 'Bauer'
 	}
-
 	s.validate(d)
 
-	assert_equals(s.first_name.result[0], 'Jack')
-	assert_equals(s.first_name.result[1], u'Jack')
+	assert_equals(s.first_name.original, 'Jack')
+	assert_equals(s.first_name.result, u'Jack')
 
 	assert_true(s.last_name.valid)
 	
 	d = {
 		'last_name': ''
 	}
-
 	s.reset()
 	s.validate(d)
-
 	assert_false(s.valid)

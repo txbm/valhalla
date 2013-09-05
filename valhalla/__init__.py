@@ -73,8 +73,12 @@ class Field(object):
 		return self._errors
 
 	@property
+	def original(self):
+		return self._original_value
+
+	@property
 	def result(self):
-		return (self._original_value, self._value)
+		return self._value
 
 	def reset(self):
 		self._ran = False
