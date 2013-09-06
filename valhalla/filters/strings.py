@@ -20,13 +20,13 @@ def _prehook(*args, **kwargs):
 
 	return value if type(value) is unicode else unicode(value)
 
-def text(min_len, max_len, *args, **kwargs):
+def text(min_len=None, max_len=None, *args, **kwargs):
 	value = kwargs.get('_value')
 
-	if min_len and len(value) <= min_len:
+	if min_len is not None and len(value) <= min_len:
 		raise ValidationError('Text length must be greater than %s' % min_len)
 
-	if max_len and len(value) >= max_len:
+	if max_len is not None and len(value) >= max_len:
 		raise ValidationError('Text length must be less than %s' % max_len)
 
 	return value

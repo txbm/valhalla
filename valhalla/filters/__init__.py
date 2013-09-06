@@ -2,7 +2,8 @@ from importlib import import_module
 
 __all__ = [
 	'strings',
-	'numerical'
+	'numerical',
+	'web'
 ]
 
 def lookup(name):
