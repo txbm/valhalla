@@ -97,4 +97,4 @@ def slugify(*args, **kwargs):
 	value = kwargs.get('_value')
 	value = _regexes['punctuation'].sub('', value)
 	value = _regexes['notword'].sub('-', value)
-	return value
+	return value.lower()
