@@ -7,13 +7,13 @@ def date(): pass
 def time(): pass
 
 # validates that datetime is before specified datetime
-def before(): pass
+def time_before(): pass
 
 # validates that datetime is after specified datetime
-def after(): pass
+def time_after(): pass
 
 # validates that datetime is between specified times
-def between(): pass
+def time_between(): pass
 
 # validates that delta between two times is within allowed range
 def delta_range(): pass

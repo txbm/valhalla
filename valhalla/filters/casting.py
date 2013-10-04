@@ -16,7 +16,7 @@ def jsbool(_value=None, *args, **kwargs):
 		'{}'
 	]
 
-	if not _value or _value in false_list
+	if not _value or _value in false_list:
 		return False
 	
 	return True

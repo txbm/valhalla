@@ -44,7 +44,7 @@ def alpha(_value=None, *args, **kwargs):
 
 	return _value
 
-def numeric(_value=None, *args, **kwargs):
+def numeric_string(_value=None, *args, **kwargs):
 	if not _regexes['numeric'].match(_value):
 		raise ValidationError('This _value must contain numeric characters only.')
 

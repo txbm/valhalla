@@ -1,8 +1,13 @@
 from importlib import import_module
 
 __all__ = [
-	'strings',
+	'casting',
+	'chrono',
+	'collection',
+	'logical',
+	'money',
 	'numerical',
+	'strings',
 	'web'
 ]
 

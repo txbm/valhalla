@@ -67,16 +67,16 @@ def test_alpha():
 	assert_false(s.actual_numbers.valid)
 	assert_false(s.alnum_string.valid)
 
-def test_numeric():
+def test_numeric_string():
 	s = _blank_schema()
-	s.numeric_string.numeric()
+	s.numeric_string.numeric_string()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
 	s = _blank_schema()
 
-	s.actual_numbers.numeric()
+	s.actual_numbers.numeric_string()
 	s.validate(_sample_data())
 
 	assert_false(s.valid)
