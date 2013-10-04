@@ -12,89 +12,77 @@ _regexes = {
 	'dash_under_space': re.compile (r'[\-_\s]+', re.IGNORECASE)
 }
 
-def _prehook(*args, **kwargs):
-	value = kwargs.get('_value')
+def _prehook(_strip=True, _value=None, *args, **kwargs):
+	if type(_value) not in (unicode, str):
+		raise ValidationError('This _value must be a str or unicode type.')
 
-	if type(value) not in (unicode, str):
-		raise ValidationError('This value must be a str or unicode type.')
+	if _strip:
+		_value = strip(_value=_value)
 
-	return value if type(value) is unicode else unicode(value)
+	return _value if type(_value) is unicode else unicode(_value)
 
-def text(min_len=None, max_len=None, *args, **kwargs):
-	value = kwargs.get('_value')
-
-	if min_len is not None and len(value) <= min_len:
+def text(min_len=None, max_len=None, _value=None, *args, **kwargs):
+	if min_len is not None and len(_value) <= min_len:
 		raise ValidationError('Text length must be greater than %s' % min_len)
 
-	if max_len is not None and len(value) >= max_len:
+	if max_len is not None and len(_value) >= max_len:
 		raise ValidationError('Text length must be less than %s' % max_len)
 
-	return value
+	return _value
 
-def alphanumeric(*args, **kwargs):
-	value = kwargs.get('_value')
+def alphanumeric(_value=None, *args, **kwargs):
+	if not _regexes['alphanumeric'].match(_value):
+		raise ValidationError('This _value must contain alphanumeric characters only.')
 
-	if not _regexes['alphanumeric'].match(value):
-		raise ValidationError('This value must contain alphanumeric characters only.')
-
-	return value
+	return _value
 
 alnum = alphanumeric
 
-def alpha(*args, **kwargs):
-	value = kwargs.get('_value')
+def alpha(_value=None, *args, **kwargs):
+	if not _regexes['alpha'].match(_value):
+		raise ValidationError('This _value must contain alphabetical characters only.')
 
-	if not _regexes['alpha'].match(value):
-		raise ValidationError('This value must contain alphabetical characters only.')
+	return _value
 
-	return value
+def numeric(_value=None, *args, **kwargs):
+	if not _regexes['numeric'].match(_value):
+		raise ValidationError('This _value must contain numeric characters only.')
 
-def numeric(*args, **kwargs):
-	value = kwargs.get('_value')
+	return _value
 
-	if not _regexes['numeric'].match(value):
-		raise ValidationError('This value must contain numeric characters only.')
+def nonblank(_value=None, *args, **kwargs):
+	if len(_value) <= 0:
+		raise ValidationError('This _value must not be empty.')
 
-	return value
+	return _value
 
-def nonblank(*args, **kwargs):
-	value = kwargs.get('_value')
+def removespaces(_value=None, *args, **kwargs):
+	return _value.replace(u' ', u'')
 
-	if len(value) <= 0:
-		raise ValidationError('This value must not be empty.')
+def strip(_value=None, *args, **kwargs):
+	return _value.strip()
 
-	return value
+def lower(_value=None, *args, **kwargs):
+	return _value.lower()
 
-def removespaces(*args, **kwargs):
-	return kwargs.get('_value').replace(u' ', u'')
+def upper(_value=None, *args, **kwargs):
+	return _value.upper()
 
-def strip(*args, **kwargs):
-	return kwargs.get('_value').strip()
-
-def lower(*args, **kwargs):
-	return kwargs.get('_value').lower()
-
-def upper(*args, **kwargs):
-	return kwargs.get('_value').upper()
-
-def regex(regex, case=False, *args, **kwargs):
-	value = kwargs.get('_value')
-
+def regex(regex, case=False, _value=None, *args, **kwargs):
 	if kwargs.get('case'):
 		regex = re.compile(regex)
 	else:
 		regex = re.compile(regex, re.IGNORECASE)
 
-	if not regex.match(value):
-		raise ValidationError('The value must match the regex %s' % regex)
+	if not regex.match(_value):
+		raise ValidationError('The _value must match the regex %s' % regex)
 
-	return value
+	return _value
 
-def canonize(*args, **kwargs):
-	return _regexes['dash_under_space'].sub('_', kwargs.get('_value').strip().lower())
+def canonize(_value=None, *args, **kwargs):
+	return _regexes['dash_under_space'].sub('_', _value.strip().lower())
 
-def slugify(*args, **kwargs):
-	value = kwargs.get('_value')
-	value = _regexes['punctuation'].sub('', value)
-	value = _regexes['notword'].sub('-', value)
-	return value.lower()
+def slugify(_value=None, *args, **kwargs):
+	_value = _regexes['punctuation'].sub('', _value)
+	_value = _regexes['notword'].sub('-', _value)
+	return _value.lower()

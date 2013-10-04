@@ -15,9 +15,11 @@ def _sample_data():
 		'random_string': '1232 fsdfdsfs 993132.....fdsfd#@#@KLJFD(((#@)_',
 		'actual_numbers': 1234566779999,
 		'awkward_spaces': 'open   the    door get on the    floo   rrr',
-		'flanking_spaces': '        everybody do the dinosaur      ',
+		'flanking_spaces': '        everybody walk the dinosaur      ',
 		'upper_case': 'I AM THE RAWRMACHINE',
-		'lower_case': 'i am the quiet mouse'
+		'lower_case': 'i am the quiet mouse',
+		'noncanonical_string': 'THERE IS NOTHING-CANONICAL__ABOUTMEEEEEE333            see?',
+		'notslugified': 'I AM NOT SLUGIFIED #@(#*@(#@ OMG PUNCTU3232...ATION    ---- who submits data like this anyway?'
 	}
 
 def test_text():
@@ -106,7 +108,7 @@ def test_strip():
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
-	assert_equals(s.flanking_spaces.result, 'everybody do the dinosaur')
+	assert_equals(s.flanking_spaces.result, 'everybody walk the dinosaur')
 
 def test_lower():
 	s = _blank_schema()
@@ -136,3 +138,21 @@ def test_regex():
 	s.validate(_sample_data())
 
 	assert_false(s.valid)
+
+def test_canonize():
+	s = _blank_schema()
+	s.noncanonical_string.canonize()
+
+	s.validate(_sample_data())
+
+	assert_true(s.valid)
+	assert_equals(s.noncanonical_string.result, u'there_is_nothing_canonical_aboutmeeeeee333_see?')
+
+def test_slugify():
+	s = _blank_schema()
+	s.notslugified.slugify()
+
+	s.validate(_sample_data())
+
+	assert_true(s.valid)
+	assert_equals(s.notslugified.result, u'i-am-not-slugified--omg-punctu3232ation---------who-submits-data-like-this-anyway')

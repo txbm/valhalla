@@ -1,4 +1,4 @@
-from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_in
+from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_in, assert_greater_equal
 
 from .. import Schema, Field
 
@@ -12,6 +12,21 @@ def test_schema():
 	assert_true(s.valid)
 	s.reset()
 	assert_false(s.valid)
+
+
+	d = {'password': '1234', 'password_confirmation': '1234'}
+	s = Schema('Matching Schema', match={'password': 'password_confirmation'})
+	s.password.text()
+	s.password_confirmation.text()
+	s.validate(d)
+	assert_true(s.valid)
+	s.reset()
+	d = {'password': '1234', 'password_confirmation': '12345'}
+	assert_false(s.valid)
+	assert_false(s.password.valid)
+	assert_false(s.password_confirmation.valid)
+	assert_greater_equal(s.password.errors, 1)
+	assert_greater_equal(s.password_confirmation.errors, 1)
 
 def test_field():
 	s = Schema('Test Schema')

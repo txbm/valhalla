@@ -3,62 +3,49 @@ from numbers import Number
 from .. import ValidationError
 
 
-def _prehook(*args, **kwargs):
-	value = kwargs.get('_value')
+def _prehook(_value=None, *args, **kwargs):
+	if not isinstance(_value, Number):
+		raise ValidationError('This _value must be a number.')
 
-	if not isinstance(value, Number):
-		raise ValidationError('This value must be a number.')
+	return _value
 
-	return value
-
-def range(low=None, high=None, *args, **kwargs):
-	value = kwargs.get('_value')
-	
-	if low is not None and value < low:
+def range(low=None, high=None, _value=None, *args, **kwargs):
+	if low is not None and _value < low:
 		raise ValidationError('This number must be greater than or equal to %s' % low)
 
-	if high is not None and value > high:
+	if high is not None and _value > high:
 		raise ValidationError('This number must be less than or equal to %s' % high)
 
-	return value
+	return _value
 
-def minimum(number, *args, **kwargs):
-	value = kwargs.get('_value')
-
-	if value < number:
+def minimum(number, _value=None, *args, **kwargs):
+	if _value < number:
 		raise ValidationError('This number must be greater than or equal to %s' % number)
 
-	return value
+	return _value
 
-def maximum(number, *args, **kwargs):
-	value = kwargs.get('_value')
-
-	if value > number:
+def maximum(number, _value=None, *args, **kwargs):
+	if _value > number:
 		raise ValidationError('This number must be less than or equal to %s' % number)
 
-	return value
+	return _value
 
-def between(low=None, high=None, *args, **kwargs):
-	value = kwargs.get('_value')
-
-	if low is not None and value <= low:
+def between(low=None, high=None, _value=None, *args, **kwargs):
+	if low is not None and _value <= low:
 		raise ValidationError('This number must be greater than %s' % low)
 
-	if high is not None and value >= high:
+	if high is not None and _value >= high:
 		raise ValidationError('This number must be less than %s' % high)
 
-	return value
+	return _value
 
-def equal(number, *args, **kwargs):
-	value = kwargs.get('_value')
-
-	if value != number:
+def equal(number, _value=None, *args, **kwargs):
+	if _value != number:
 		raise ValidationError('This number must be equal to %s' % number)
 
-	return value
+	return _value
 
-def zero(*args, **kwargs):
-	value = kwargs.get('_value')
-	if value is not 0:
+def zero(_value=None, *args, **kwargs):
+	if _value is not 0:
 		raise ValidationError('This number must be zero.')
-	return value
+	return _value

@@ -7,10 +7,11 @@ class ValidationError(Exception): pass
 
 class Schema(object):
 
-	def __init__(self, name):
+	def __init__(self, name, match={}):
 		self._name = name
 		self._fields = {}
 		self._valid = False
+		self._match = match
 
 	def __getattr__(self, attr):
 		return self.add_field(attr, Field(self, attr))
@@ -36,6 +37,20 @@ class Schema(object):
 		for name, field in self._fields.iteritems():
 			if not field.validate(data_dict.get(name)):
 				self._valid = False
+		
+		for f1_name, f2_name in self._match.iteritems():
+			try:
+				f1, f2 = self._fields[f1_name], self._fields[f2_name]
+			except KeyError:
+				continue
+			
+			if f1.result != f2.result:
+				self._valid = False
+				f1._valid = False
+				f2._valid = False
+				f1._errors.append('This field must match %s' % f2)
+				f2._errors.append('This field must match %s' % f1)
+
 
 	def reset(self):
 		[f.reset() for n, f in self._fields.iteritems()]
