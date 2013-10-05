@@ -54,3 +54,9 @@ def numeric(_value=None, *args, **kwargs):
 		return int(_value)
 
 	return float(_value)
+
+def string(_value=None, *args, **kwargs):
+	try:
+		return unicode(_value)
+	except ValueError:
+		raise ValidationError('The specified value %s could not be casting to a unicode string' % _value)

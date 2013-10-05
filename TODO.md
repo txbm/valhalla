@@ -1,2 +1,2 @@
 * Make a SQLAlchemy schema-builder that intelligently reads a SQLAlchemy model and builds a recommended schema.
-* Add more validators
+* Add locale specification support to [date, time, datetime] validators so that ```field_name.date(locale='en_US')``` uses Python's built in locale support to provide the correct validation behavior.
