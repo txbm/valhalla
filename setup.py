@@ -12,7 +12,7 @@ setup(
 	author_email='petermelias@gmail.com',
 	license='MIT',
 	packages=find_packages(),
-	install_requires=[],
+	install_requires=['coveralls'],
 	extras_require={
 		'test': ['nose']
 	},
