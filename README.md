@@ -1,6 +1,5 @@
 # Valhalla
 [![Build Status](https://travis-ci.org/petermelias/valhalla.png?branch=master)](https://travis-ci.org/petermelias/valhalla) [![Coverage Status](https://coveralls.io/repos/petermelias/valhalla/badge.png?branch=master)](https://coveralls.io/r/petermelias/valhalla?branch=master) [![Downloads](https://pypip.in/d/valhalla/badge.png)](https://crate.io/packages/valhalla) [![Downloads](https://pypip.in/v/valhalla/badge.png)](https://crate.io/package/valhalla)
------------
 
 This is a very minimalist Python data validation and filtering library.
 
