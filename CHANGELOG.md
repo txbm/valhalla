@@ -12,3 +12,4 @@ current version: 0.0.3
 * Added a schema-level ```match``` option used like so: ```s = Schema('my_schema', match={'password': 'password_confirm'})```
 * Changed the name of the ```strings.numeric``` validator to ```strings.numeric_string``` to differentiate it from the ```casting.numeric``` filter. Remember that filters are thrust into a global namespace as part of the API's brevity.
 * Added tests for the chrono module
+* Added in travis-ci with coveralls and pypins
