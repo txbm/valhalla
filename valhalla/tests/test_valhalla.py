@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_in, assert_greater_equal
 
 from .. import Schema, Field

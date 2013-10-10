@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime as m_datetime, date as m_date, time as m_time, timedelta as m_timedelta
 
 from .. import ValidationError

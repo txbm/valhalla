@@ -1,6 +1,9 @@
 # Changelog
 current version: 0.0.3
 
+## v.0.0.4
+* Added the ```money.credit_card``` validator and tests
+
 ## v0.0.3
 
 * Added a prehook ```_strip``` option for ALL string validators. The option is ```True``` by default and will invoke the ```strip()``` validator on all string validators.

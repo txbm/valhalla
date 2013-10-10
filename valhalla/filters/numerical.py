@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from numbers import Number
 
 from .. import ValidationError
