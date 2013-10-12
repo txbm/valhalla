@@ -34,6 +34,10 @@ class Schema(object):
 		return self._name
 
 	@property
+	def errors(self):
+		return {f.name: f.errors for f_name, f in self._fields.iteritems()}
+
+	@property
 	def valid(self):
 		return self._valid
 
@@ -59,9 +63,6 @@ class Schema(object):
 
 	# options are ['all', None, [], ['fields']]
 	def _process_required(self, data_dict):
-		if not self._field_options['require']:
-			return
-		
 		if self._field_options['require'] == 'all':
 			self._field_options['require'] = self._fields.keys()
 		
@@ -71,24 +72,28 @@ class Schema(object):
 				field.require()
 			except KeyError: pass
 
-		required_fields = set([f.name for f in self._fields if f.required])
+		required_fields = set([f.name for f_name, f in self._fields.iteritems() if f.required])
 		supplied_fields = set(data_dict.keys())
 
 		missing_fields = required_fields - supplied_fields
 		for f_name in missing_fields:
 			field = self._fields[f_name]
 			field._valid = False
+			field._ran = True
 			field._errors.append('This field cannot be missing.')
+			self._valid = False
 
 	def _process_matching(self, data_dict):
 		if not self._field_options['match']:
 			return
 
 		for f_names in self._field_options['match']:
-			fields = _names_to_fields(f_names)
-			if not all(f.result == fields[0].result for f in fields):
-				self._valid = False
-				self._errors.append('Fields [%s] do not match.' % ' '.join(f_names))
+			fields = self._names_to_fields(f_names)
+			for f in fields:
+				if f.result != fields[0].result:
+					f._valid = False
+					f._errors.append('Field %s does not match [%s].' % (f.name, ' '.join(f_names)))
+					self._valid = False
 
 	def _set_blanks(self):
 		if not self._field_options['blank']:
@@ -96,7 +101,7 @@ class Schema(object):
 
 		[f.blank(False) for f in self._fields if f.name not in self._field_options['blank']]
 
-	def _names_to_fields(field_names):
+	def _names_to_fields(self, field_names):
 		fields = []
 		for f_name in field_names:
 			try:

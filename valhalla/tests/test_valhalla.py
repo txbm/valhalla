@@ -49,7 +49,7 @@ def test_field():
 	
 	assert_false(s.other_name.valid)
 	assert_false(s.second_field.valid)
-	assert_in('This field is required.', s.other_name.errors)
+	assert_in('This field cannot be missing.', s.other_name.errors)
 
 def test_filter():
 	s = Schema('Test Schema')
