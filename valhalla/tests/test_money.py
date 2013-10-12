@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from .. import Schema
+from . import _schema
 
 test_data = {
 	'valid_visa': ('4012888888881881', '12.2020', '124'),
@@ -16,9 +16,6 @@ test_data = {
 	'forbidden_type': ('378282246310005', '09-2020', '9090'),
 	'expired_date': ('378282246310005', '0689', '9090')
 }
-
-def _schema():
-	return Schema('Test Schema')
 
 def test_credit_card():
 	s = _schema()

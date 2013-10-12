@@ -2,10 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false
 
-from .. import Schema
-
-def _blank_schema():
-	return Schema('Test Schema')
+from . import _schema
 
 def _sample_data():
 	return {
@@ -19,7 +16,7 @@ def _sample_data():
 	}
 
 def test_email():
-	s = _blank_schema()
+	s = _schema()
 	s.valid_email.email()
 	s.invalid_email.email()
 	s.invalid_email2.email()
@@ -32,7 +29,7 @@ def test_email():
 	assert_false(s.invalid_email3.valid)
 
 def test_ipv4():
-	s = _blank_schema()
+	s = _schema()
 	s.valid_ipv4.ipv4()
 	s.invalid_ipv4.ipv4()
 	s.invalid_ipv42.ipv4()

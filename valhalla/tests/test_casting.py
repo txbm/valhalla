@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from .. import Schema
+from . import _schema
 
 test_data = {
 	'true_value': 'i am truth',
@@ -23,9 +23,6 @@ test_data = {
 	'not_integer': 'monkey time',
 	'sizable_number': '12390858430439843049084325754382940234'
 }
-
-def _schema():
-	return Schema('Test Schema')
 
 def test_boolean():
 	s = _schema()

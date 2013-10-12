@@ -4,10 +4,7 @@ from .. import ValidationError
 
 
 def boolean(_value=None, *args, **kwargs):
-	if not _value:
-		return False
-	
-	return True
+	return False if not _value else True
 
 def jsbool(_value=None, *args, **kwargs):
 	false_list = [
@@ -18,10 +15,7 @@ def jsbool(_value=None, *args, **kwargs):
 		'{}'
 	]
 
-	if not _value or _value in false_list:
-		return False
-	
-	return True
+	return False if not _value or _value in false_list else True
 
 def strbool(_value=None, *args, **kwargs):
 	false_list = [
@@ -34,10 +28,7 @@ def strbool(_value=None, *args, **kwargs):
 		'None',	
 	]
 
-	if not _value or _value in false_list:
-		return False
-
-	return True
+	return False if not _value or _value in false_list else True
 
 def integer(_value=None, *args, **kwargs):
 	try:
@@ -49,7 +40,7 @@ def longint(_value=None, *args, **kwargs):
 	try:
 		return long(_value)
 	except ValueError:
-		raise ValidationError('The value %s cannot be converted to an integer.' % _value)
+		raise ValidationError('The value %s cannot be converted to a long integer.' % _value)
 
 def numeric(_value=None, *args, **kwargs):
 	if float(_value).is_integer():
@@ -62,3 +53,19 @@ def string(_value=None, *args, **kwargs):
 		return unicode(_value)
 	except ValueError:
 		raise ValidationError('The specified value %s could not be casting to a unicode string' % _value)
+
+# casts any "none type" value to None, else returns value unharmed. language agnostic.
+def none(_value=None, *args, **kwargs):
+	none_list = [
+		'',
+		'None',
+		'none',
+		'undefined',
+		'null',
+		'n/a',
+		'na',
+	]
+
+	value = _value.lower().strip()
+	
+	return None if value in none_list else _value

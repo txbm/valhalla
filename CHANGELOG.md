@@ -2,10 +2,12 @@
 current version: 0.0.3
 
 ## v.0.0.4
-* Added the ```money.credit_card``` validator and tests
+* Added the ```money.credit_card``` filter and tests
+* Added a test for ```logical.constant```
+* Added the ```casting.none``` filter
+* Added the ```match```, ```require```, ```blank```, and ```extra``` options to the schema.
 
 ## v0.0.3
-
 * Added a prehook ```_strip``` option for ALL string validators. The option is ```True``` by default and will invoke the ```strip()``` validator on all string validators.
 * Added the following filter modules ```[casting, chrono, collection, logical]```
 * Added tests for ```strings.canonize``` and ```strings.slugify```

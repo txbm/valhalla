@@ -1,14 +1,11 @@
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from .. import Schema
+from . import _schema
 
 test_data = {
 	'some_dict': {'one': 'fish', 'two': 'fish', 'red': 'fish', 'blue': 'fish'},
 	'some_list': ['alpha', 'bravo', 'charlie', 'delta']
 }
-
-def _schema():
-	return Schema('Test Schema')
 
 def test_drop_keys():
 	s = _schema()

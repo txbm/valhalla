@@ -4,7 +4,7 @@ from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_
 
 from datetime import date, time, datetime
 
-from .. import Schema
+from . import _schema
 
 test_data = {
 	'valid_date': '12/06/1989',
@@ -24,9 +24,6 @@ test_data = {
 	'far_far_away': '2050-12-06',
 	'long_time_ago': '1800-01-01'
 }
-
-def _schema():
-	return Schema('Test Schema')
 
 def test_date():
 	s = _schema()
