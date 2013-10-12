@@ -15,9 +15,8 @@ def test_schema():
 	s.reset()
 	assert_false(s.valid)
 
-
 	d = {'password': '1234', 'password_confirmation': '1234'}
-	s = Schema('Matching Schema', match={'password': 'password_confirmation'})
+	s = Schema('Matching Schema', match=[('password', 'password_confirmation')])
 	s.password.text()
 	s.password_confirmation.text()
 	s.validate(d)
@@ -32,7 +31,7 @@ def test_schema():
 
 def test_field():
 	s = Schema('Test Schema')
-	s.second_field(alt='other_name', req=True)
+	s.second_field().alt('other_name').require()
 	d = {
 		'other_name': 'Test Value A',
 		'second_field': 'Test Value B'
@@ -43,9 +42,11 @@ def test_field():
 	assert_equals(s.second_field.result, 'Test Value A') # because this should not have been run twice
 	s.reset()
 	assert_false(s.valid)
+	
 	d = {'total_fail': 'will not work'}
 	s.validate(d)
 	assert_false(s.valid)
+	
 	assert_false(s.other_name.valid)
 	assert_false(s.second_field.valid)
 	assert_in('This field is required.', s.other_name.errors)

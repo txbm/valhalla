@@ -66,6 +66,6 @@ def none(_value=None, *args, **kwargs):
 		'na',
 	]
 
-	value = _value.lower().strip()
+	value = str(_value).lower().strip()
 	
 	return None if value in none_list else _value

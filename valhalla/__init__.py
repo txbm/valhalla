@@ -4,9 +4,10 @@ from functools import partial
 from inspect import getmembers
 
 from filters import lookup
-from filters.casting import none
 
 class ValidationError(Exception): pass
+
+from filters.casting import none
 
 class Schema(object):
 
@@ -47,6 +48,11 @@ class Schema(object):
 
 	def validate(self, data_dict, **kwargs):
 		self._valid = True
+
+		self._process_required(data_dict)
+		self._process_matching(data_dict)
+		self._set_blanks()
+		
 		for name, field in self._fields.iteritems():
 			if not field.validate(data_dict.get(name)):
 				self._valid = False
@@ -83,6 +89,12 @@ class Schema(object):
 			if not all(f.result == fields[0].result for f in fields):
 				self._valid = False
 				self._errors.append('Fields [%s] do not match.' % ' '.join(f_names))
+
+	def _set_blanks(self):
+		if not self._field_options['blank']:
+			return
+
+		[f.blank(False) for f in self._fields if f.name not in self._field_options['blank']]
 
 	def _names_to_fields(field_names):
 		fields = []
