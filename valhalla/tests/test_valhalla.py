@@ -4,30 +4,35 @@ from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_
 
 from .. import Schema, Field
 
+test_schema_data = {
+	'blank_field': '',
+	'other_blank_field': '',
+	'required_field': 'I am required',
+	'match_me': 'match.com',
+	'match_to_me': 'match.com',
+	'not_a_good_match': 'notmatch.com'
+}
+
 def test_schema():
-	s = Schema('Test Schema')
-	assert_equals(s._fields, {})
-	f = s.add_field('test_field', Field(s, 'test_field'))
-	assert_equals(f, s.test_field)
-	d = {'test_field': 'test_value'}
-	s.validate(d)
-	assert_true(s.valid)
-	s.reset()
+	s = Schema()
+	s.blank_field.blank(False)
+	s.other_blank_field
+	s.required_field.require()
+	s.missing_field.require()
+	s.match_me.match('match_to_me', 'not_a_good_match')
+	s.match_to_me
+	s.not_a_good_match
+
+	s.validate(test_schema_data)
 	assert_false(s.valid)
 
-	d = {'password': '1234', 'password_confirmation': '1234'}
-	s = Schema('Matching Schema', match=[('password', 'password_confirmation')])
-	s.password.text()
-	s.password_confirmation.text()
-	s.validate(d)
-	assert_true(s.valid)
-	s.reset()
-	d = {'password': '1234', 'password_confirmation': '12345'}
-	assert_false(s.valid)
-	assert_false(s.password.valid)
-	assert_false(s.password_confirmation.valid)
-	assert_greater_equal(s.password.errors, 1)
-	assert_greater_equal(s.password_confirmation.errors, 1)
+	assert_false(s.blank_field.valid)
+	assert_true(s.other_blank_field.valid)
+	assert_true(s.required_field.valid)
+	assert_false(s.missing_field.valid)
+	assert_false(s.match_me.valid)
+	assert_false(s.match_to_me.valid)
+	assert_false(s.not_a_good_match.valid)
 
 def test_field():
 	s = Schema('Test Schema')

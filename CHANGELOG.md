@@ -6,6 +6,7 @@ current version: 0.0.3
 * Added a test for ```logical.constant```
 * Added the ```casting.none``` filter
 * Added the ```match```, ```require```, ```blank```, and ```extra``` options to the schema.
+* Added a LICENSE...
 
 ## v0.0.3
 * Added a prehook ```_strip``` option for ALL string validators. The option is ```True``` by default and will invoke the ```strip()``` validator on all string validators.

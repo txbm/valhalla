@@ -11,7 +11,7 @@ from filters.casting import none
 
 class Schema(object):
 
-	def __init__(self, name, match=[], require=[], blank=[], extra='ignore'):
+	def __init__(self, name=None, match=[], require=[], blank=[], extra='ignore'):
 		self._name = name
 		self._fields = {}
 		self._valid = False
@@ -78,22 +78,25 @@ class Schema(object):
 		missing_fields = required_fields - supplied_fields
 		for f_name in missing_fields:
 			field = self._fields[f_name]
-			field._valid = False
 			field._ran = True
 			field._errors.append('This field cannot be missing.')
 			self._valid = False
 
 	def _process_matching(self, data_dict):
-		if not self._field_options['match']:
-			return
-
 		for f_names in self._field_options['match']:
-			fields = self._names_to_fields(f_names)
 			for f in fields:
-				if f.result != fields[0].result:
-					f._valid = False
-					f._errors.append('Field %s does not match [%s].' % (f.name, ' '.join(f_names)))
-					self._valid = False
+				other_fields = fields[:].remove(f)
+				[f.match(*other_fields) for f in other_fields]
+
+		for f_name, f in self._fields.iteritems():
+			must_match = f.must_match
+			if must_match:
+				for m in must_match:
+					if f.result != m.result:
+						f._ran = True
+						f._errors.append('This field must match these fields [%s]' % ', '.join([m.name for m in must_match]))
+						self._valid = False
+
 
 	def _set_blanks(self):
 		if not self._field_options['blank']:
@@ -101,14 +104,15 @@ class Schema(object):
 
 		[f.blank(False) for f in self._fields if f.name not in self._field_options['blank']]
 
-	def _names_to_fields(self, field_names):
+	''' returns a set of fields because alt names will return the same field '''
+	def _get_fields_by_name(self, field_names):
 		fields = []
 		for f_name in field_names:
 			try:
+				print self._fields
 				fields.append(self._fields[f_name])
 			except KeyError: pass
-		return fields
-
+		return set(fields)
 
 	def reset(self):
 		[f.reset() for n, f in self._fields.iteritems()]
@@ -163,6 +167,10 @@ class Field(object):
 			return True
 		return self._blank
 
+	@property
+	def must_match(self):
+		return self._match
+
 	def reset(self):
 		self._ran = False
 		self._valid = False
@@ -206,7 +214,7 @@ class Field(object):
 
 	def match(self, *other_fields):
 		if not self._match:
-			self._match = other_fields
+			self._match = self._schema._get_fields_by_name(other_fields)
 		return self
 
 	def __call__(self, *args, **kwargs):
