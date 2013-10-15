@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_in, assert_greater_equal
 
-from .. import Schema, Field
+from valhalla import Schema, Field
 
 test_schema_data = {
 	'blank_field': '',
@@ -13,10 +13,17 @@ test_schema_data = {
 	'not_a_good_match': 'notmatch.com'
 }
 
+test_data_two = {
+	'password': '1234',
+	'password_confirm': '12345',
+	'field_one': 'i am required',
+	'can_be_blank': ''
+}
+
 def test_schema():
 	s = Schema()
-	s.blank_field.blank(False)
-	s.other_blank_field
+	s.blank_field
+	s.other_blank_field.blank(True)
 	s.required_field.require()
 	s.missing_field.require()
 	s.match_me.match('match_to_me', 'not_a_good_match')
@@ -33,6 +40,22 @@ def test_schema():
 	assert_false(s.match_me.valid)
 	assert_false(s.match_to_me.valid)
 	assert_false(s.not_a_good_match.valid)
+
+	s = Schema(match=[('password', 'password_confirm')], require=['field_one', 'field_two'], blank=['can_be_blank'])
+	s.password
+	s.password_confirm
+	s.field_one
+	s.field_two
+	s.can_be_blank
+
+	s.validate(test_data_two)
+	assert_false(s.valid)
+
+	assert_false(s.password.valid)
+	assert_false(s.password_confirm.valid)
+	assert_true(s.field_one.valid)
+	assert_false(s.field_two.valid)
+	assert_true(s.can_be_blank.valid)
 
 def test_field():
 	s = Schema('Test Schema')
@@ -76,4 +99,4 @@ def test_filter():
 	}
 	s.reset()
 	s.validate(d)
-	assert_false(s.valid)
+	assert_false(s.valid),

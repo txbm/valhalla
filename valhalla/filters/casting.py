@@ -6,26 +6,10 @@ from .. import ValidationError
 def boolean(_value=None, *args, **kwargs):
 	return False if not _value else True
 
-def jsbool(_value=None, *args, **kwargs):
-	false_list = [
-		'undefined',
-		'false',
-		'null',
-		'[]',
-		'{}'
-	]
-
-	return False if not _value or _value in false_list else True
-
 def strbool(_value=None, *args, **kwargs):
 	false_list = [
-		'undefined',
 		'false',
-		'0',
-		'[]',
-		'{}',
-		'',
-		'None',	
+		'0'
 	]
 
 	return False if not _value or _value in false_list else True
@@ -58,12 +42,13 @@ def string(_value=None, *args, **kwargs):
 def none(_value=None, *args, **kwargs):
 	none_list = [
 		'',
-		'None',
 		'none',
 		'undefined',
 		'null',
 		'n/a',
 		'na',
+		'[]',
+		'{}',
 	]
 
 	value = str(_value).lower().strip()

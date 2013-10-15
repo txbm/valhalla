@@ -30,7 +30,7 @@ def _field_option(option_name):
 					if type(field_names) is list:
 						fields = self._get_fields_by_name(field_names)
 					elif field_names == 'all':
-						fields = self._fields
+						fields = self._fields.values()
 					args.append(fields)
 				args = tuple(args)
 				return f(*args, **kwargs)
@@ -108,9 +108,9 @@ class Schema(object):
 	def match_fields(self, field_names, field_groups):
 		for group in field_groups:
 			for f in group:
-				others = group[:]
-				others.remove(f)
-				f.match(others)
+				others = group.copy()
+				others.discard(f)
+				f.match(*others)
 
 	def validate(self, data_dict, **kwargs):
 		supplied_fields = set(data_dict.keys())
@@ -155,6 +155,7 @@ class Schema(object):
 		for f_name, value in data_dict.iteritems():
 			field = self._fields[f_name]
 			must_match = field.must_match
+	
 			if must_match and type(must_match[0]) is not Field:
 				must_match = self._get_fields_by_name(must_match)
 
@@ -212,7 +213,7 @@ class Field(object):
 	@property
 	def blank_allowed(self):
 		if self._blank is None:
-			return True
+			return False
 		return self._blank
 
 	@property

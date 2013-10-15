@@ -2,11 +2,11 @@
 
 from nose.tools.trivial import assert_true, assert_equals
 
-from . import _schema
+from valhalla import Schema
 
 
 def test_constant():
-	s = _schema()
+	s = Schema()
 	s.some_cst_value.constant('blue apple')
 
 	s.validate({'some_cst_value': 'Roger that'})

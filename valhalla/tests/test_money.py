@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from . import _schema
+from valhalla import Schema
 
 test_data = {
 	'valid_visa': ('4012888888881881', '12.2020', '124'),
@@ -18,7 +18,7 @@ test_data = {
 }
 
 def test_credit_card():
-	s = _schema()
+	s = Schema()
 
 	s.valid_visa.credit_card()
 	s.valid_amex.credit_card()

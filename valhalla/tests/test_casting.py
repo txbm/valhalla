@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from . import _schema
+from valhalla import Schema
 
 test_data = {
 	'true_value': 'i am truth',
@@ -13,11 +13,6 @@ test_data = {
 	'str_false_4': '[]',
 	'str_false_5': '{}',
 	'str_false_6': 'None',
-	'js_false_1': 'undefined',
-	'js_false_2': 'false',
-	'js_false_3': 'null',
-	'js_false_4': '[]',
-	'js_false_5': '{}',
 	'integer_value': '54',
 	'float_value': '4.23',
 	'not_integer': 'monkey time',
@@ -25,7 +20,7 @@ test_data = {
 }
 
 def test_boolean():
-	s = _schema()
+	s = Schema(blank='all')
 	s.true_value.boolean()
 	s.false_value.boolean()
 	s.validate(test_data)
@@ -33,27 +28,8 @@ def test_boolean():
 	assert_true(s.true_value.result)
 	assert_equals(s.false_value.result, False)
 
-def test_jsbool():
-	s = _schema()
-	s.true_value.jsbool()
-	s.js_false_1.jsbool()
-	s.js_false_2.jsbool()
-	s.js_false_3.jsbool()
-	s.js_false_4.jsbool()
-	s.js_false_5.jsbool()
-	
-	s.validate(test_data)
-	assert_true(s.valid)
-
-	assert_true(s.true_value.result)
-	assert_equals(s.js_false_1.result, False)
-	assert_equals(s.js_false_2.result, False)
-	assert_equals(s.js_false_3.result, False)
-	assert_equals(s.js_false_4.result, False)
-	assert_equals(s.js_false_5.result, False)
-
 def test_strbool():
-	s = _schema()
+	s = Schema(blank='all')
 	s.true_value.strbool()
 	s.str_false_1.strbool()
 	s.str_false_2.strbool()
@@ -75,7 +51,7 @@ def test_strbool():
 
 
 def test_integer():
-	s = _schema()
+	s = Schema()
 	s.integer_value.integer()
 	s.float_value.integer()
 	s.not_integer.integer()
@@ -90,7 +66,7 @@ def test_integer():
 	assert_is_instance(s.integer_value.result, int)
 
 def test_longint():
-	s = _schema()
+	s = Schema()
 	s.integer_value.longint()
 	s.float_value.longint()
 	s.sizable_number.longint()
@@ -102,7 +78,7 @@ def test_longint():
 	assert_is_instance(s.sizable_number.result, long)
 
 def test_numeric():
-	s = _schema()
+	s = Schema()
 	s.integer_value.numeric()
 	s.float_value.numeric()
 

@@ -2,7 +2,7 @@
 
 from nose.tools.trivial import assert_equals, assert_true, assert_false
 
-from . import _schema
+from valhalla import Schema
 
 def _sample_data():
 	return {
@@ -22,26 +22,26 @@ def _sample_data():
 	}
 
 def test_text():
-	s = _schema()
+	s = Schema()
 	s.random_string.text()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 	s.actual_numbers.text()
 
 	s.validate(_sample_data())
 	assert_false(s.valid)
 
 def test_alnum():
-	s = _schema()
+	s = Schema()
 	s.alnum_string.alnum()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 	s.alpha_string.alnum()
 	s.actual_numbers.alnum()
 
@@ -52,13 +52,13 @@ def test_alnum():
 	assert_true(s.alpha_string.valid)
 
 def test_alpha():
-	s = _schema()
+	s = Schema()
 	s.alpha_string.alpha()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 	s.actual_numbers.alpha()
 	s.alnum_string.alpha()
 
@@ -67,13 +67,13 @@ def test_alpha():
 	assert_false(s.alnum_string.valid)
 
 def test_numeric_string():
-	s = _schema()
+	s = Schema()
 	s.numeric_string.numeric_string()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 
 	s.actual_numbers.numeric_string()
 	s.validate(_sample_data())
@@ -81,20 +81,20 @@ def test_numeric_string():
 	assert_false(s.valid)
 
 def test_nonblank():
-	s = _schema()
+	s = Schema()
 	s.random_string.nonblank()
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 	s.blank_string.nonblank()
 	s.validate(_sample_data())
 
 	assert_false(s.valid)
 
 def test_removespaces():
-	s = _schema()
+	s = Schema()
 	s.awkward_spaces.removespaces()
 	s.validate(_sample_data())
 
@@ -102,7 +102,7 @@ def test_removespaces():
 	assert_equals(s.awkward_spaces.result, 'openthedoorgetonthefloorrr')
 
 def test_strip():
-	s = _schema()
+	s = Schema()
 	s.flanking_spaces.strip()
 	s.validate(_sample_data())
 
@@ -110,7 +110,7 @@ def test_strip():
 	assert_equals(s.flanking_spaces.result, 'everybody walk the dinosaur')
 
 def test_lower():
-	s = _schema()
+	s = Schema()
 	s.upper_case.lower()
 	s.validate(_sample_data())
 
@@ -118,7 +118,7 @@ def test_lower():
 	assert_equals(s.upper_case.result, 'i am the rawrmachine')
 
 def test_upper():
-	s = _schema()
+	s = Schema()
 	s.lower_case.upper()
 	s.validate(_sample_data())
 
@@ -126,20 +126,20 @@ def test_upper():
 	assert_equals(s.lower_case.result, 'I AM THE QUIET MOUSE')
 
 def test_regex():
-	s = _schema()
+	s = Schema()
 	s.numeric_string.regex(r'\d')
 	s.validate(_sample_data())
 
 	assert_true(s.valid)
 
-	s = _schema()
+	s = Schema()
 	s.alpha_string.regex(r'\d')
 	s.validate(_sample_data())
 
 	assert_false(s.valid)
 
 def test_canonize():
-	s = _schema()
+	s = Schema()
 	s.noncanonical_string.canonize()
 
 	s.validate(_sample_data())
@@ -148,7 +148,7 @@ def test_canonize():
 	assert_equals(s.noncanonical_string.result, u'there_is_nothing_canonical_aboutmeeeeee333_see?')
 
 def test_slugify():
-	s = _schema()
+	s = Schema()
 	s.notslugified.slugify()
 
 	s.validate(_sample_data())

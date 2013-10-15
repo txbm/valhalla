@@ -1,6 +1,6 @@
 from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_is, assert_is_instance
 
-from . import _schema
+from valhalla import Schema
 
 test_data = {
 	'some_dict': {'one': 'fish', 'two': 'fish', 'red': 'fish', 'blue': 'fish'},
@@ -8,7 +8,7 @@ test_data = {
 }
 
 def test_drop_keys():
-	s = _schema()
+	s = Schema()
 	s.some_dict.drop_keys(('one', 'two'))
 
 	s.validate(test_data)
@@ -17,7 +17,7 @@ def test_drop_keys():
 	assert_equals(s.some_dict.result, {'red': 'fish', 'blue': 'fish'})
 
 def test_contains():
-	s = _schema()
+	s = Schema()
 	s.some_list.contains('bravo')
 
 	s.validate(test_data)

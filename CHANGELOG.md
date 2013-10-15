@@ -1,5 +1,5 @@
 # Changelog
-current version: 0.0.3
+current version: 0.0.4
 
 ## v.0.0.4
 * Added the ```money.credit_card``` filter and tests
@@ -7,6 +7,8 @@ current version: 0.0.3
 * Added the ```casting.none``` filter
 * Added the ```match```, ```require```, ```blank```, and ```extra``` options to the schema.
 * Added a LICENSE...
+* If a ```Field``` is present, blank is NOT allowed by default. However, ```Field``` is OPTIONAL by default.
+* Removed the ```casting.jsbool``` filter because of redundant functionality. Just use ```casting.none``` in conjunction with ```casting.strbool```. You will need to make sure to ```Field.blank(True)``` if you want to accept NoneType values such as 'undefined'.
 
 ## v0.0.3
 * Added a prehook ```_strip``` option for ALL string validators. The option is ```True``` by default and will invoke the ```strip()``` validator on all string validators.

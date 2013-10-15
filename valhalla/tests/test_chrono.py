@@ -4,7 +4,7 @@ from nose.tools.trivial import assert_equals, assert_true, assert_false, assert_
 
 from datetime import date, time, datetime
 
-from . import _schema
+from valhalla import Schema
 
 test_data = {
 	'valid_date': '12/06/1989',
@@ -26,7 +26,7 @@ test_data = {
 }
 
 def test_date():
-	s = _schema()
+	s = Schema()
 	s.valid_date.date()
 	s.valid_europe_date.date(format='europe')
 	s.valid_europe_expanded.date(format='europe_expanded')
@@ -43,7 +43,7 @@ def test_date():
 	assert_false(s.garbage_date.valid)
 
 def test_time():
-	s = _schema()
+	s = Schema()
 	s.valid_time.time()
 	s.valid_24_time.time(format='military')
 	s.invalid_12_time.time()
@@ -60,7 +60,7 @@ def test_time():
 	assert_false(s.garbage_time.valid)
 
 def test_datetime():
-	s = _schema()
+	s = Schema()
 	s.valid_datetime.datetime()
 	s.invalid_datetime.datetime()
 
@@ -71,7 +71,7 @@ def test_datetime():
 	assert_false(s.invalid_datetime.valid)
 
 def test_time_before():
-	s = _schema()
+	s = Schema()
 	s.my_birthday.date().time_before(date.today())
 	s.far_far_away.date(format='american_scientific').time_before(date.today())
 	s.long_time_ago.date(format='american_scientific').time_before(date.today())
@@ -84,7 +84,7 @@ def test_time_before():
 	assert_true(s.long_time_ago.valid)
 
 def test_time_after():
-	s = _schema()
+	s = Schema()
 	s.my_birthday.date().time_after(date.today())
 	s.far_far_away.date(format='american_scientific').time_after(date.today())
 	s.long_time_ago.date(format='american_scientific').time_after(date.today())
@@ -97,7 +97,7 @@ def test_time_after():
 	assert_false(s.long_time_ago.valid)
 
 def test_time_between():
-	s = _schema()
+	s = Schema()
 	s.my_birthday.date().time_between(date(1988, 1, 1), date.today())
 	s.long_time_ago.date(format='american_scientific').time_between(date.today(), date(2055, 1, 1))
 
