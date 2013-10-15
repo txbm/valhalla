@@ -5,7 +5,6 @@ setup(
 	version="0.0.4",
 	description='A slim validation library with a very elegant API designed to afford the least amount of typing.',
 	long_description=open('README.md').read(),
-	classifiers=[],
 	keywords='',
 	url='http://github.com/petermelias/valhalla',
 	author='Peter M. Elias',
