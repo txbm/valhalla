@@ -1,7 +1,10 @@
 # Changelog
 current version: 0.0.4
 
-## v.0.0.4
+## v0.0.5
+* Added the ``` casting.decimal ``` filter and tests.
+
+## v0.0.4
 * Added the ```money.credit_card``` filter and tests
 * Added a test for ```logical.constant```
 * Added the ```casting.none``` filter
