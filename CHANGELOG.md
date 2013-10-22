@@ -1,5 +1,8 @@
 # Changelog
-current version: 0.0.5
+current version: 0.0.6
+
+## v0.0.6
+* BUGFIX: validating required fields now properly recognizes fields supplied with alternate names
 
 ## v0.0.5
 * Added the ``` casting.decimal ``` filter and tests.

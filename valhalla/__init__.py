@@ -178,12 +178,15 @@ class Schema(object):
 
         missing_fields = required_fields - supplied_fields
 
-        for f_name in missing_fields:
-            field = self._fields[f_name]
-            field._ran = True
-            field._errors.append('This field cannot be missing.')
+        s = set(self._get_fields_by_name(supplied_fields))
+        m = set(self._get_fields_by_name(missing_fields))
+        actually_missing = m - s
 
-        return not missing_fields
+        for f in actually_missing:
+            f._ran = True
+            f._errors.append('This field cannot be missing.')
+
+        return not actually_missing
 
     def _validate_blank(self, data_dict):
         for f_name, value in data_dict.iteritems():
@@ -220,7 +223,7 @@ class Field(object):
         self._filters = []
         self._required = None
         self._blank = None
-        self._alternate_name = None
+        self._alternate_fields = []
         self._match = []
 
         self.reset()

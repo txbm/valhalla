@@ -22,6 +22,11 @@ test_data_two = {
     'can_be_blank': ''
 }
 
+test_required_data = {
+    'required_field': 'Here I am',
+    'required_field_alt': 'So am I'
+}
+
 
 def test_schema():
     s = Schema()
@@ -63,6 +68,12 @@ def test_schema():
 
     assert_equals(
         s.results, {'field_one': 'i am required', 'can_be_blank': None})
+
+    s = Schema()
+    s.some_field.alt('required_field').require()
+    s.validate(test_required_data)
+
+    assert_true(s.valid)
 
 
 def test_field():
