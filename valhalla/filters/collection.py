@@ -10,15 +10,19 @@ def _prehook(_value=None, *args, **kwargs):
     return _value
 
 
-def drop_keys(keys=(), _value=None, *args, **kwargs):
+def drop_keys(*args, **kwargs):
+    _value = kwargs.pop('_value')
+
     if type(_value) is not dict:
         raise ValidationError('This validator requires a dictionary.')
-    [_value.pop(unicode(k), None) for k in keys]
+    [_value.pop(unicode(k), None) for k in args]
     return _value
 
 
-def contains(key, _value=None, *args, **kwargs):
-    if not key in _value:
-        raise ValidationError(
-            'The key %s was not found in the target collection.' % key)
+def contains(*args, **kwargs):
+    _value = kwargs.pop('_value')
+    for k in args:
+        if k not in _value:
+            raise ValidationError(
+                'The key %s was not found in the target collection.' % k)
     return _value

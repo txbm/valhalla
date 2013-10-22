@@ -79,6 +79,53 @@ So, if a field is NOT REQUIRED, and NOT BLANK. Then you can omit the field entir
 s.some_field.blank(False).require(False) # either supply me with a real value or go home. this is the default for all fields.
 
 ```
+### Dict-Based Schema Definitions (New in v0.0.7)
+
+So these are really fun, especially if you are a functional programmer at heart...
+
+``` python
+
+my_definition = {
+	'email': ['require', ('alt', 'email_address'), 'email'], # email address with alternate name
+	'age': ['require', 'numeric', ('range', 13, 100)] # age must be numeric between 13 and 100
+	'password': [('text', 10, 50)],
+	'passwordConfirm': [('match', 'password')]
+}
+
+s = Schema.from_dict(my_definition)
+s.validate(some_data) # Bam!
+
+```
+
+I know, really cool. Also probably really confusing if you didn't spot the pattern right away...
+
+Explanation: keys are field names, options follow in a list. If you want to call an option without arguments, simply specify it as a string. If you want to call an option (filter or modifier) with arguments, you use a tuple.
+
+For example, the following two blocks are equivalent:
+
+``` python
+
+s = Schema()
+s.my_happy_place.require().text(min_len=15, max_len=25)
+
+```
+
+same as
+
+``` python
+
+sdict = {
+	'my_happy_place': ['require', ('text', 15, 25)]
+}
+
+s = Schema.from_dict(sdict)
+
+```
+
+The only and obvious downside of dict-based definitions is that they require you to know the argument order of most of the filters. Luckily, most filters do not even take arguments and the ones that do are fairly obvious / intuitive / documented :)
+
+The ``` from_dict ``` method takes ``` **kwargs ``` so you can just pass your Schema level options like ``` force_unicode=True ``` there.
+
 ## Filters (validators)
 
 There are currently 42 filter functions (validators) in this library. They are spread across modules categorically, but all end up in the same namespace because of the dynamic lookup system used for the API. This is not really much of an issue, since the filters use (and will continue to use) non-ambiguous names.

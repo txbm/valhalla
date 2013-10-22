@@ -2,13 +2,9 @@
 
 from functools import partial, wraps
 
-from filters import lookup
-
 
 class ValidationError(Exception):
     pass
-
-from filters.casting import none
 
 
 def _field_option(option_name):
@@ -43,7 +39,24 @@ def _field_option(option_name):
 
 class Schema(object):
 
-    def __init__(self, name=None, match=[], require=[], blank=[], extra='ignore', force_unicode=True):
+    @classmethod
+    def from_dict(cls, dict_scheme, **kwargs):
+        if type(dict_scheme) is not dict:
+            raise TypeError(
+                'Dict scheme must be dict and follow valid format.')
+
+        s = Schema(**kwargs)
+        for f_name, modifiers in dict_scheme.iteritems():
+            field = getattr(s, f_name)
+            for m in modifiers:
+                if type(m) is str:
+                    getattr(field, m)()
+                elif type(m) is tuple:
+                    getattr(field, m[0])(*m[1:])
+        return s
+
+    def __init__(self, name=None, match=[], require=[], blank=[],
+                 extra='ignore', force_unicode=True):
         self._name = unicode(name)
         self._fields = {}
         self._extra = extra
@@ -61,8 +74,6 @@ class Schema(object):
     def __repr__(self):
         return '<%r: [%r]' % (self.name, ', '.join(
             [f for f in self._fields.values()]))
-
-    ''' returns a set of fields because alt names will return the same field '''
 
     def _get_fields_by_name(self, field_names):
         fields = []
@@ -349,3 +360,7 @@ class Filter(object):
     def run(self, value):
         processed = self._validation_fxn(_value=value)
         return processed
+
+
+from filters import lookup
+from filters.casting import none

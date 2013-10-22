@@ -1,5 +1,9 @@
 # Changelog
-current version: 0.0.6
+current version: 0.0.7
+
+## v0.0.7
+* Added support for dict-based schema definitions via ``` Schema.from_dict(dict_scheme, **kwargs) ```
+* Fixed ``` collections.drop_keys ``` and ``` collections.contains ``` to support ``` *args ``` for convenience.
 
 ## v0.0.6
 * BUGFIX: validating required fields now properly recognizes fields supplied with alternate names

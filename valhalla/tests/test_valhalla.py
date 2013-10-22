@@ -27,6 +27,18 @@ test_required_data = {
     'required_field_alt': 'So am I'
 }
 
+test_dict_schema = {
+    'email_address': ['email', ('alt', 'email'), 'require'],
+    'some_number': ['numeric', ('range', 10, 15)],
+    'some_collection': [('contains', 'apple')]
+}
+
+dict_schema_data = {
+    'email': 'petermelias@gmail.com',
+    'some_number': '13',
+    'some_collection': ['orange', 'apple', 'monkey']
+}
+
 
 def test_schema():
     s = Schema()
@@ -73,6 +85,10 @@ def test_schema():
     s.some_field.alt('required_field').require()
     s.validate(test_required_data)
 
+    assert_true(s.valid)
+
+    s = Schema.from_dict(test_dict_schema)
+    s.validate(dict_schema_data)
     assert_true(s.valid)
 
 
