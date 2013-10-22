@@ -43,6 +43,8 @@ assert_false(s.password.valid) # True
 print s.password.errors # This field must match [password_confirm]
 assert_true(s.location.valid) # True, field is not required
 
+print s.results # {'email_address': 'petermelias@gmail.com'} etc... only yields valid values.
+
 # Field-wide options may specified at the Schema-level or at the Field-level, field-level takes precedence.
 s = Schema(require=['some_field'])
 s.some_field.require(False) # overrides the schema setting

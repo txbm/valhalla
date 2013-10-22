@@ -1,8 +1,11 @@
 # Changelog
-current version: 0.0.4
+current version: 0.0.5
 
 ## v0.0.5
 * Added the ``` casting.decimal ``` filter and tests.
+* Added ``` Schema.results ``` not sure why this was not added earlier. Brain fail.
+* Added full unicode support via ``` Schema(force_unicode=True) ```. Leaving this set to True will
+cause the schema and the data input to be intelligently casted to unicode where appropriate.
 
 ## v0.0.4
 * Added the ```money.credit_card``` filter and tests

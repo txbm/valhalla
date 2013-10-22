@@ -43,11 +43,12 @@ def _field_option(option_name):
 
 class Schema(object):
 
-    def __init__(self, name=None, match=[], require=[], blank=[], extra='ignore'):
-        self._name = name
+    def __init__(self, name=None, match=[], require=[], blank=[], extra='ignore', force_unicode=True):
+        self._name = unicode(name)
         self._fields = {}
         self._extra = extra
         self._missing = []
+        self._force_unicode = force_unicode
 
         self._field_options = {}
         self._field_options['match'] = match
@@ -58,7 +59,8 @@ class Schema(object):
         return self.add_field(attr, Field(self, attr))
 
     def __repr__(self):
-        return '[Schema: %r] - [%r]' % (self.name, ', '.join([repr(field) for name, field in self._fields.iteritems()]))
+        return '<%r: [%r]' % (self.name, ', '.join(
+            [f for f in self._fields.values()]))
 
     ''' returns a set of fields because alt names will return the same field '''
 
@@ -66,7 +68,7 @@ class Schema(object):
         fields = []
         for f_name in field_names:
             try:
-                fields.append(self._fields[f_name])
+                fields.append(self._fields[unicode(f_name)])
             except KeyError:
                 pass
         return set(fields)
@@ -87,7 +89,13 @@ class Schema(object):
     def missing(self):
         return list(self._missing)
 
+    @property
+    def results(self):
+        return {f.name: f.result for n, f in self._fields.iteritems()
+                if f.valid}
+
     def add_field(self, name, field):
+        name = unicode(name)
         self._fields[name] = field
         setattr(self, name, field)
         return field
@@ -120,10 +128,13 @@ class Schema(object):
         supplied_fields = set(data_dict.keys())
         actual_fields = set(self._fields.keys())
         known_fields = supplied_fields.intersection(actual_fields)
-        unknown_fields = supplied_fields.difference(actual_fields)
+        #unknown_fields = supplied_fields.difference(actual_fields)
 
         if self._extra == 'ignore':
             data_dict = {k: data_dict[k] for k in known_fields}
+
+        if self._force_unicode:
+            data_dict = self._cast_to_unicode(data_dict)
 
         self.required_fields(self._field_options['require'])
         self.blank_fields(self._field_options['blank'])
@@ -135,6 +146,30 @@ class Schema(object):
 
         [field.validate(data_dict.get(f_name))
          for f_name, field in self._fields.iteritems()]
+
+    def _cast_to_unicode(self, data_dict):
+
+        def _string_cast(value):
+            if type(value) is str:
+                return unicode(value)
+            return value
+
+        new_dict = {}
+
+        for k, v in data_dict.iteritems():
+            new_k = _string_cast(k)
+            if type(v) is (set):
+                v = dict(v)
+            if type(v) is (dict):
+                new_dict[new_k] = self._cast_to_unicode(v)
+                continue
+            elif type(v) is list:
+                new_dict[new_k] = [_string_cast(i) for i in v]
+            elif type(v) is tuple:
+                new_dict[new_k] = tuple([_string_cast(i) for i in v])
+            else:
+                new_dict[new_k] = _string_cast(v)
+        return new_dict
 
     def _validate_required(self, data_dict):
         required_fields = set(
@@ -170,7 +205,8 @@ class Schema(object):
                     m._ran = True
                 field._ran = True
                 field._errors.append(
-                    'This field must match: [%s]' % ', '.join([m.name for m in must_match]))
+                    'This field must match: [%s]' % ', '.join(
+                        [m.name for m in must_match]))
 
     def reset(self):
         [f.reset() for n, f in self._fields.iteritems()]
@@ -180,7 +216,7 @@ class Field(object):
 
     def __init__(self, schema, name):
         self._schema = schema
-        self._name = name
+        self._name = unicode(name)
         self._filters = []
         self._required = None
         self._blank = None
@@ -190,7 +226,7 @@ class Field(object):
         self.reset()
 
     def __repr__(self):
-        return '[Field: %r] - [%r, %r, %r] - %r' % (self.name, self._original_value, self._value, self._valid, self._errors)
+        return '<%r: (%r, %r)>' % (self.name, self.original, self.result)
 
     @property
     def name(self):
@@ -239,6 +275,7 @@ class Field(object):
             return self._valid
 
         self._original_value = self._value = none(_value=value)
+
         try:
             for f in self._filters:
                 self._value = f.run(self._value)
