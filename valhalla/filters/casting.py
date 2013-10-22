@@ -55,9 +55,6 @@ def string(_value=None, *args, **kwargs):
         raise ValidationError(
             'The specified value %s could not be casted to a unicode string' % _value)
 
-# casts any "none type" value to None, else returns value unharmed.
-# language agnostic.
-
 
 def none(_value=None, *args, **kwargs):
     none_list = [
