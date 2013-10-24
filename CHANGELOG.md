@@ -1,20 +1,23 @@
 # Changelog
-current version: 0.0.7
+current version: 0.0.8
 
-## v0.0.7
+### v0.0.8
+* Added the ``` strings.key_lookup ``` filter. This is used for creating lookup dictionaries to convert input values to logical equivalents. For example, ``` schema.state_name.key_lookup({'MA': 'Massachusetts'}) ``` would convert an incoming value of "MA" to "Massachusetts". You can set missing key behavior via ``` nomatch ``` param.
+
+### v0.0.7
 * Added support for dict-based schema definitions via ``` Schema.from_dict(dict_scheme, **kwargs) ```
 * Fixed ``` collections.drop_keys ``` and ``` collections.contains ``` to support ``` *args ``` for convenience.
 
-## v0.0.6
+### v0.0.6
 * BUGFIX: validating required fields now properly recognizes fields supplied with alternate names
 
-## v0.0.5
+### v0.0.5
 * Added the ``` casting.decimal ``` filter and tests.
 * Added ``` Schema.results ``` not sure why this was not added earlier. Brain fail.
 * Added full unicode support via ``` Schema(force_unicode=True) ```. Leaving this set to True will
 cause the schema and the data input to be intelligently casted to unicode where appropriate.
 
-## v0.0.4
+### v0.0.4
 * Added the ```money.credit_card``` filter and tests
 * Added a test for ```logical.constant```
 * Added the ```casting.none``` filter
@@ -23,7 +26,7 @@ cause the schema and the data input to be intelligently casted to unicode where 
 * If a ```Field``` is present, blank is NOT allowed by default. However, ```Field``` is OPTIONAL by default.
 * Removed the ```casting.jsbool``` filter because of redundant functionality. Just use ```casting.none``` in conjunction with ```casting.strbool```. You will need to make sure to ```Field.blank(True)``` if you want to accept NoneType values such as 'undefined'.
 
-## v0.0.3
+### v0.0.3
 * Added a prehook ```_strip``` option for ALL string validators. The option is ```True``` by default and will invoke the ```strip()``` validator on all string validators.
 * Added the following filter modules ```[casting, chrono, collection, logical]```
 * Added tests for ```strings.canonize``` and ```strings.slugify```

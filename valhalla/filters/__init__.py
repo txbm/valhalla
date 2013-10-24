@@ -3,35 +3,38 @@
 from importlib import import_module
 
 __all__ = [
-	'casting',
-	'chrono',
-	'collection',
-	'logical',
-	'money',
-	'numerical',
-	'strings',
-	'web'
+    'casting',
+    'chrono',
+    'collection',
+    'logical',
+    'money',
+    'numerical',
+    'strings',
+    'web'
 ]
 
+
 def lookup(name):
-	mod, pre, post = [None for i in xrange(3)]
-	
-	for m in __all__:
-		mod_name = 'valhalla.filters.%s' % m
-		mod = import_module(mod_name)
-		if hasattr(mod, name):
-			break
-	
-	try:
-		pre = mod._prehook
-		if name in mod._disable_prehook:
-			pre = None
-	except AttributeError: pass
+    mod, pre, post = [None for i in xrange(3)]
 
-	try:
-		post = mod._posthook
-		if name in mod._disable_posthook:
-			post = None
-	except AttributeError: pass
+    for m in __all__:
+        mod_name = 'valhalla.filters.%s' % m
+        mod = import_module(mod_name)
+        if hasattr(mod, name):
+            break
 
-	return (getattr(mod, name), pre, post)
+    try:
+        pre = mod._prehook
+        if name in mod._disable_prehook:
+            pre = None
+    except AttributeError:
+        pass
+
+    try:
+        post = mod._posthook
+        if name in mod._disable_posthook:
+            post = None
+    except AttributeError:
+        pass
+
+    return (getattr(mod, name), pre, post)

@@ -104,3 +104,14 @@ def slugify(_value=None, *args, **kwargs):
     _value = _regexes['punctuation'].sub('', _value)
     _value = _regexes['notword'].sub('-', _value)
     return _value.lower()
+
+
+def key_lookup(ref, nomatch='pass', _value=None, *args, **kwargs):
+    try:
+        return ref[_value]
+    except KeyError:
+        if nomatch == 'pass':
+            return _value
+        else:
+            raise ValidationError(
+                'Could not find a matching entry for key %s' % _value)

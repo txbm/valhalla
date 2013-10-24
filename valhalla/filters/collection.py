@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .. import ValidationError
+from valhalla import ValidationError
 
 
 def _prehook(_value=None, *args, **kwargs):
