@@ -202,9 +202,11 @@ class Schema(object):
     def _validate_blank(self, data_dict):
         for f_name, value in data_dict.iteritems():
             field = self._fields[f_name]
-            if not field.blank_allowed and none(value) is None:
-                field._ran = True
-                field._errors.append('This field cannot be blank.')
+
+            if none(value) is None:
+                if not field.blank_allowed:
+                    field._errors.append('This field cannot be blank.')
+                    field._ran = True
 
     def _validate_matching(self, data_dict):
         for f_name, value in data_dict.iteritems():

@@ -16,6 +16,9 @@ _regexes = {
 
 
 def _prehook(_strip=True, _value=None, *args, **kwargs):
+    if _value is None:
+        return u''
+
     if type(_value) not in (unicode, str):
         raise ValidationError('This _value must be a str or unicode type.')
 
