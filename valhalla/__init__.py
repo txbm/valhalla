@@ -72,7 +72,7 @@ class Schema(object):
         return self.add_field(attr, Field(self, attr))
 
     def __repr__(self):
-        return '<%r: [%r]' % (self.name, ', '.join(
+        return '<%r: [%r] >' % (self.name, ', '.join(
             [f for f in self._fields.values()]))
 
     def _get_fields_by_name(self, field_names):
@@ -85,7 +85,7 @@ class Schema(object):
         return set(fields)
 
     @property
-    def name(self):
+    def schema_name(self):
         return self._name
 
     @property

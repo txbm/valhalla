@@ -1,5 +1,8 @@
 # Changelog
-current version: 0.0.9
+current version: 0.0.10
+
+### v0.0.10
+* Renamed ``` Schema.name ``` to ``` Schema.schema_name ``` to eliminate the collision caused due to the frequent and obvious need for a field called "name".
 
 ### v0.0.9
 * ``` strings._pre_hook ``` now converts ``` Nonetype ``` to empty string if received.
