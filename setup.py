@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="valhalla",
-    version="0.0.11",
+    version="0.0.12",
     description='A slim validation library with a very elegant API designed to afford the least amount of typing.',
     long_description=open('README.md').read(),
     keywords='',

@@ -1,5 +1,8 @@
 # Changelog
-current version: 0.0.11
+current version: 0.0.12
+
+### v0.0.12
+* Required behavior bugfix
 
 ### v0.0.11
 * Fixed a behavior with required field checking so that missing fields are not validated. Eventually might refactor the entire way the schema processes input...

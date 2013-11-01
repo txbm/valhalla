@@ -192,6 +192,8 @@ class Schema(object):
             f._ran = True
             if f.required:
                 f._errors.append('This field cannot be missing.')
+            else:
+                f._valid = True
 
     def _validate_blank(self, data_dict):
         for f_name, value in data_dict.iteritems():
