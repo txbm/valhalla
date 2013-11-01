@@ -1,11 +1,14 @@
 # Changelog
-current version: 0.0.10
+current version: 0.0.11
+
+### v0.0.11
+* Fixed a behavior with required field checking so that missing fields are not validated. Eventually might refactor the entire way the schema processes input...
 
 ### v0.0.10
 * Renamed ``` Schema.name ``` to ``` Schema.schema_name ``` to eliminate the collision caused due to the frequent and obvious need for a field called "name".
 
 ### v0.0.9
-* ``` strings._pre_hook ``` now converts ``` Nonetype ``` to empty string if received.
+* ``` strings._pre_hook ``` now converts ``` NoneType ``` to empty string if received.
 
 ### v0.0.8
 * Added the ``` strings.key_lookup ``` filter. This is used for creating lookup dictionaries to convert input values to logical equivalents. For example, ``` schema.state_name.key_lookup({'MA': 'Massachusetts'}) ``` would convert an incoming value of "MA" to "Massachusetts". You can set missing key behavior via ``` nomatch ``` param.

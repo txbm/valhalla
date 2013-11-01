@@ -20,7 +20,7 @@ def strbool(_value=None, *args, **kwargs):
 def integer(_value=None, *args, **kwargs):
     try:
         return int(_value)
-    except ValueError:
+    except (ValueError, TypeError):
         raise ValidationError(
             'The value %s cannot be converted to an integer.' % _value)
 

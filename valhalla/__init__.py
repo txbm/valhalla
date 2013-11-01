@@ -136,13 +136,14 @@ class Schema(object):
                 f.match(*others)
 
     def validate(self, data_dict, **kwargs):
-        supplied_fields = set(data_dict.keys())
-        actual_fields = set(self._fields.keys())
-        known_fields = supplied_fields.intersection(actual_fields)
+        supplied_field_names = set(data_dict.keys())
+        all_field_names = set(self._fields.keys())
+        known_field_names = supplied_field_names.intersection(
+            all_field_names)
         #unknown_fields = supplied_fields.difference(actual_fields)
 
         if self._extra == 'ignore':
-            data_dict = {k: data_dict[k] for k in known_fields}
+            data_dict = {k: data_dict[k] for k in known_field_names}
 
         if self._force_unicode:
             data_dict = self._cast_to_unicode(data_dict)
@@ -183,21 +184,14 @@ class Schema(object):
         return new_dict
 
     def _validate_required(self, data_dict):
-        required_fields = set(
-            [f.name for f_name, f in self._fields.iteritems() if f.required])
-        supplied_fields = set(data_dict.keys())
+        all_fields = set(self._fields.values())
+        supplied_fields = set(self._get_fields_by_name(data_dict.keys()))
+        missing_fields = all_fields - supplied_fields
 
-        missing_fields = required_fields - supplied_fields
-
-        s = set(self._get_fields_by_name(supplied_fields))
-        m = set(self._get_fields_by_name(missing_fields))
-        actually_missing = m - s
-
-        for f in actually_missing:
+        for f in missing_fields:
             f._ran = True
-            f._errors.append('This field cannot be missing.')
-
-        return not actually_missing
+            if f.required:
+                f._errors.append('This field cannot be missing.')
 
     def _validate_blank(self, data_dict):
         for f_name, value in data_dict.iteritems():
