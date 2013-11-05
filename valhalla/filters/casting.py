@@ -14,7 +14,15 @@ def strbool(_value=None, *args, **kwargs):
         '0'
     ]
 
-    return False if not _value or _value in false_list else True
+    _value = none(_value=_value)
+
+    if not _value:
+        return False
+
+    if _value in false_list:
+        return False
+
+    return True
 
 
 def integer(_value=None, *args, **kwargs):
@@ -22,7 +30,8 @@ def integer(_value=None, *args, **kwargs):
         return int(_value)
     except (ValueError, TypeError):
         raise ValidationError(
-            'The value %s cannot be converted to an integer.' % _value)
+            'The value %s cannot be converted to \
+            an integer.' % _value)
 
 
 def longint(_value=None, *args, **kwargs):
@@ -30,7 +39,8 @@ def longint(_value=None, *args, **kwargs):
         return long(_value)
     except ValueError:
         raise ValidationError(
-            'The value %s cannot be converted to a long integer.' % _value)
+            'The value %s cannot be converted \
+            to a long integer.' % _value)
 
 
 def numeric(_value=None, *args, **kwargs):
@@ -45,7 +55,8 @@ def decimal(_value=None, *args, **kwargs):
         return Decimal(_value)
     except (ValueError, InvalidOperation):
         raise ValidationError(
-            'The specified value %s could not be casted to a Decimal' % _value)
+            'The specified value %s could not \
+            be casted to a Decimal' % _value)
 
 
 def string(_value=None, *args, **kwargs):
@@ -53,7 +64,8 @@ def string(_value=None, *args, **kwargs):
         return unicode(_value)
     except ValueError:
         raise ValidationError(
-            'The specified value %s could not be casted to a unicode string' % _value)
+            'The specified value %s could not be \
+            casted to a unicode string' % _value)
 
 
 def none(_value=None, *args, **kwargs):
@@ -68,6 +80,6 @@ def none(_value=None, *args, **kwargs):
         '{}',
     ]
 
-    value = str(_value).lower().strip()
+    string_value = unicode(_value).lower().strip()
 
-    return None if value in none_list else _value
+    return None if string_value in none_list else _value

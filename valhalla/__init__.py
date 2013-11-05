@@ -1,40 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from functools import partial, wraps
+
+from functools import partial
 
 
 class ValidationError(Exception):
     pass
-
-
-def _field_option(option_name):
-    def _decorator(f):
-        @wraps(f)
-        def _wrapper(*args, **kwargs):
-            self, field_names = args[0], args[1]
-
-            if self._field_options[option_name] is not None:
-                self._field_options[option_name] = None
-
-                fields = []
-                field_groups = []
-
-                args = list(args)
-                if option_name == 'match':
-                    for g in field_names:
-                        field_groups.append(self._get_fields_by_name(g))
-                    args.append(field_groups)
-                else:
-                    if type(field_names) is list:
-                        fields = self._get_fields_by_name(field_names)
-                    elif field_names == 'all':
-                        fields = self._fields.values()
-                    args.append(fields)
-                args = tuple(args)
-                return f(*args, **kwargs)
-            return None
-        return _wrapper
-    return _decorator
 
 
 class Schema(object):
@@ -43,7 +14,7 @@ class Schema(object):
     def from_dict(cls, dict_scheme, **kwargs):
         if type(dict_scheme) is not dict:
             raise TypeError(
-                'Dict scheme must be dict and follow valid format.')
+                'Dict schema must be a dict and follow valid format.')
 
         s = Schema(**kwargs)
         for f_name, modifiers in dict_scheme.iteritems():
@@ -55,109 +26,154 @@ class Schema(object):
                     getattr(field, m[0])(*m[1:])
         return s
 
-    def __init__(self, name=None, match=[], require=[], blank=[],
-                 extra='ignore', force_unicode=True):
-        self._name = unicode(name)
-        self._fields = {}
-        self._extra = extra
-        self._missing = []
-        self._force_unicode = force_unicode
+    def __init__(self, match=[], require=[], blank=[],
+                 alts=[], extras='discard', force_unicode=True,
+                 strip_missing=True, strip_blank=True):
+
+        self._filters_by_names = {}
+        self._names_by_filters = {}
 
         self._field_options = {}
         self._field_options['match'] = match
         self._field_options['require'] = require
         self._field_options['blank'] = blank
+        self._field_options['alts'] = alts
+        self._field_options['extras'] = extras
+        self._field_options['force_unicode'] = force_unicode
+        self._field_options['strip_missing'] = strip_missing
+        self._field_options['strip_blank'] = strip_blank
 
     def __getattr__(self, attr):
-        return self.add_field(attr, Field(self, attr))
-
-    def __repr__(self):
-        return '<%r: [%r] >' % (self.name, ', '.join(
-            [f for f in self._fields.values()]))
-
-    def _get_fields_by_name(self, field_names):
-        fields = []
-        for f_name in field_names:
-            try:
-                fields.append(self._fields[unicode(f_name)])
-            except KeyError:
-                pass
-        return set(fields)
-
-    @property
-    def schema_name(self):
-        return self._name
+        return self.add_filter_chain(attr, FilterChain(self))
 
     @property
     def errors(self):
-        return {f.name: f.errors for f_name, f in self._fields.iteritems()}
+        return {ns[0]: fc.errors
+                for fc, ns in self._names_by_filters.iteritems()}
 
     @property
     def valid(self):
-        return all([f.valid for name, f in self._fields.iteritems()])
-
-    @property
-    def missing(self):
-        return list(self._missing)
+        return all([fc.valid for fc in self._names_by_filters.keys()])
 
     @property
     def results(self):
-        return {f.name: f.result for n, f in self._fields.iteritems()
-                if f.valid}
+        if self._field_options['strip_missing']:
+            r = {
+                name: filter_chain.result
+                for name, filter_chain in self._matched.iteritems()
+                if filter_chain.valid
+            }
+        else:
+            r = {
+                names[0]: filter_chain.result
+                for filter_chain, names in self._names_by_filters.iteritems()
+                if filter_chain.valid
+            }
 
-    def add_field(self, name, field):
-        name = unicode(name)
-        self._fields[name] = field
-        setattr(self, name, field)
-        return field
+        if self._field_options['strip_blank']:
+            r = {
+                name: result
+                for name, result in r.iteritems()
+                if result is not None
+            }
 
-    @_field_option('require')
-    def required_fields(self, field_names, fields):
-        [f.require(True) for f in fields]
+        return r
 
-    def optional_fields(self, field_names):
-        fields = self._get_fields_by_name(field_names)
-        [f.require(False) for f in fields]
+    def add_filter_chain(self, name, filter_chain):
+        self._filters_by_names[name] = filter_chain
 
-    @_field_option('blank')
-    def blank_fields(self, field_names, fields):
-        [f.blank(True) for f in fields]
+        try:
+            existing_names = self._names_by_filters[filter_chain]
+        except KeyError:
+            existing_names = []
 
-    def not_blank_fields(self, field_names):
-        fields = self._get_fields_by_name(field_names)
-        [f.blank(False) for f in fields]
-
-    @_field_option('match')
-    def match_fields(self, field_names, field_groups):
-        for group in field_groups:
-            for f in group:
-                others = group.copy()
-                others.discard(f)
-                f.match(*others)
+        existing_names.append(name)
+        self._names_by_filters[filter_chain] = existing_names
+        setattr(self, name, filter_chain)
+        return filter_chain
 
     def validate(self, data_dict, **kwargs):
-        supplied_field_names = set(data_dict.keys())
-        all_field_names = set(self._fields.keys())
-        known_field_names = supplied_field_names.intersection(
-            all_field_names)
-        #unknown_fields = supplied_fields.difference(actual_fields)
+        self._apply_alternate_fields()
 
-        if self._extra == 'ignore':
-            data_dict = {k: data_dict[k] for k in known_field_names}
+        present_names = set(data_dict.keys())
+        defined_names = set(self._filters_by_names.keys())
 
-        if self._force_unicode:
+        matched_names = defined_names.intersection(present_names)
+        unmatched_names = defined_names.difference(present_names)
+
+        missing_names = defined_names.intersection(unmatched_names)
+
+        matched_filters_by_name = {
+            n: fc for n, fc in self._filters_by_names.iteritems()
+            if n in matched_names
+        }
+        self._matched = matched_filters_by_name
+
+        missing_filters = set([
+            self._filters_by_names[n] for n in missing_names
+        ]).difference(set(matched_filters_by_name.values()))
+
+        missing_filters_by_name = {}
+        for filter_chain in missing_filters:
+            names = self._names_by_filters[filter_chain]
+            missing_filters_by_name[names[0]] = filter_chain
+
+        self._missing = missing_filters_by_name
+
+        if self._field_options['extras'] == 'discard':
+            data_dict = {k: data_dict[k] for k in matched_names}
+
+        if self._field_options['force_unicode']:
             data_dict = self._cast_to_unicode(data_dict)
 
-        self.required_fields(self._field_options['require'])
-        self.blank_fields(self._field_options['blank'])
-        self.match_fields(self._field_options['match'])
+        self._apply_required_fields(missing_filters_by_name)
+        self._apply_blank_fields(matched_filters_by_name)
+        self._apply_matching_fields(matched_filters_by_name)
 
-        self._validate_required(data_dict)
-        self._validate_blank(data_dict)
-        self._validate_matching(data_dict)
+        self._invalidate_missing_if_required(missing_filters_by_name)
+        self._invalidate_if_not_matching(matched_filters_by_name, data_dict)
 
-        [field.validate(data_dict.get(f_name))
-         for f_name, field in self._fields.iteritems()]
+        for name, filter_chain in matched_filters_by_name.iteritems():
+            filter_chain.validate(data_dict[name])
+
+    def _apply_required_fields(self, filters_by_name):
+        require_option = self._field_options['require']
+        for name, filter_chain in filters_by_name.iteritems():
+            if require_option == 'all':
+                filter_chain.require(True)
+            elif require_option == 'none':
+                filter_chain.require(False)
+            elif name in require_option:
+                filter_chain.require(True)
+
+    def _apply_blank_fields(self, filters_by_name):
+        blank_option = self._field_options['blank']
+        for name, filter_chain in filters_by_name.iteritems():
+            if blank_option == 'all':
+                filter_chain.blank(True)
+            elif blank_option == 'none':
+                filter_chain.blank(False)
+            elif name in blank_option:
+                filter_chain.blank(True)
+
+    def _apply_matching_fields(self, filters_by_name):
+        match_groups = self._field_options['match']
+        for match_group in match_groups:
+            first = list(match_group)[0]
+            rest = list(match_group)[1:]
+            filter_chain = filters_by_name[first]
+            for n in rest:
+                other = filters_by_name[n]
+                filter_chain.match(other)
+
+    def _apply_alternate_fields(self):
+        alt_groups = self._field_options['alts']
+        filters = self._filters_by_names
+        for g in alt_groups:
+            fc = filters[g[0]]
+            alt_names = g[1:]
+            for n in alt_names:
+                fc.alt(n)
 
     def _cast_to_unicode(self, data_dict):
 
@@ -183,66 +199,53 @@ class Schema(object):
                 new_dict[new_k] = _string_cast(v)
         return new_dict
 
-    def _validate_required(self, data_dict):
-        all_fields = set(self._fields.values())
-        supplied_fields = set(self._get_fields_by_name(data_dict.keys()))
-        missing_fields = all_fields - supplied_fields
+    def _invalidate_missing_if_required(self, filters_by_name):
+        for name, filter_chain in filters_by_name.iteritems():
+            filter_chain._ran = True
 
-        for f in missing_fields:
-            f._ran = True
-            if f.required:
-                f._errors.append('This field cannot be missing.')
+            if filter_chain.required:
+                filter_chain._errors.append('This field cannot be missing.')
             else:
-                f._valid = True
+                filter_chain._valid = True
 
-    def _validate_blank(self, data_dict):
-        for f_name, value in data_dict.iteritems():
-            field = self._fields[f_name]
+    def _invalidate_if_not_matching(self, filters_by_name, data_dict):
+        for name, filter_chain in filters_by_name.iteritems():
+            must_match = filter_chain.must_match
 
-            if none(value) is None:
-                if not field.blank_allowed:
-                    field._errors.append('This field cannot be blank.')
-                    field._ran = True
+            for m in must_match:
+                if type(m) is not FilterChain:
+                    match_name = m
+                    m = filters_by_name[m]
+                else:
+                    names = self._names_by_filters[m]
+                    match_name = [
+                        n for n in names if n in filters_by_name.keys()][0]
 
-    def _validate_matching(self, data_dict):
-        for f_name, value in data_dict.iteritems():
-            field = self._fields[f_name]
-            must_match = field.must_match
+                if data_dict[name] == data_dict[match_name]:
+                    continue
 
-            if must_match and type(must_match[0]) is not Field:
-                must_match = self._get_fields_by_name(must_match)
-
-            if any([value != data_dict[m.name] for m in must_match]):
-                for m in must_match:
-                    m._ran = True
-                field._ran = True
-                field._errors.append(
-                    'This field must match: [%s]' % ', '.join(
-                        [m.name for m in must_match]))
+                filter_chain._ran = True
+                filter_chain._errors.append(
+                    'This field must match: %s' % (match_name))
+                m._ran = True
+                m._errors.append(
+                    'This field must match: %s' % (name))
 
     def reset(self):
-        [f.reset() for n, f in self._fields.iteritems()]
+        filters = self._names_by_filters.keys()
+        [f.reset() for f in filters]
 
 
-class Field(object):
+class FilterChain(object):
 
-    def __init__(self, schema, name):
+    def __init__(self, schema):
         self._schema = schema
-        self._name = unicode(name)
         self._filters = []
         self._required = None
         self._blank = None
-        self._alternate_fields = []
         self._match = []
 
         self.reset()
-
-    def __repr__(self):
-        return '<%r: (%r, %r)>' % (self.name, self.original, self.result)
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def valid(self):
@@ -283,19 +286,25 @@ class Field(object):
         self._original_value = self._value = None
 
     def validate(self, value):
-        if self._ran:
-            return self._valid
+        if not self._ran:
+            self._original_value = self._value = value
 
-        self._original_value = self._value = none(_value=value)
+            if self._value == '':
+                self._value = None
 
-        try:
-            for f in self._filters:
-                self._value = f.run(self._value)
-        except ValidationError as e:
-            self._valid = False
-            self._errors.append(e.message)
-        else:
-            self._valid = True
+            if self._value is None and not self.blank_allowed:
+                self._errors.append('This field cannot be blank.')
+            else:
+                try:
+                    for f in self._filters:
+                        self._value = f.run(self._value)
+                except ValidationError as e:
+                    self._valid = False
+                    self._errors.append(e.message)
+                else:
+                    self._valid = True
+
+            self._ran = True
 
         return self._valid
 
@@ -309,13 +318,13 @@ class Field(object):
             self._blank = value
         return self
 
-    def match(self, *fields):
+    def match(self, *filter_chains):
         if not self._match:
-            self._match = fields
+            self._match = filter_chains
         return self
 
     def alt(self, alt_name):
-        self._schema.add_field(alt_name, self)
+        self._schema.add_filter_chain(alt_name, self)
         return self
 
     def __call__(self, *args, **kwargs):
@@ -342,15 +351,15 @@ class Field(object):
 
 class Filter(object):
 
-    def __init__(self, field, fxn):
-        self._field = field
+    def __init__(self, filter_chain, fxn):
+        self._filter_chain = filter_chain
         self._validation_fxn = fxn
 
     def __call__(self, *args, **kwargs):
         partial_fxn = partial(self._validation_fxn, *args, **kwargs)
         partial_fxn.__name__ = self._validation_fxn.__name__
         self._validation_fxn = partial_fxn
-        return self._field
+        return self._filter_chain
 
     def __repr__(self):
         return '[Filter - %r]' % self._validation_fxn.__name__
@@ -361,4 +370,3 @@ class Filter(object):
 
 
 from filters import lookup
-from filters.casting import none

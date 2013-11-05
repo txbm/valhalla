@@ -1,5 +1,12 @@
 # Changelog
-current version: 0.0.12
+current version: 0.1.0
+
+### v0.1.0
+* Major internal refactor of the Schema class, API of course remains unbroken.
+* Addition of several options: ``` Schema.strip_missing ```, ``` Schema.strip_blank ```, ``` Schema.alts ```
+* Better pathway for handling missing, blank and required value distinction.
+* Performance enhancements
+* Updated README
 
 ### v0.0.12
 * Required behavior bugfix

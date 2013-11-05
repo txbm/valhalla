@@ -37,7 +37,7 @@ def test_boolean():
 
 
 def test_strbool():
-    s = Schema(blank='all')
+    s = Schema(blank='all', strip_blank=False)
     s.true_value.strbool()
     s.str_false_1.strbool()
     s.str_false_2.strbool()

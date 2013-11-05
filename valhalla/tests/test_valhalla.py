@@ -30,13 +30,15 @@ test_required_data = {
 test_dict_schema = {
     'email_address': ['email', ('alt', 'email'), 'require'],
     'some_number': ['numeric', ('range', 10, 15)],
-    'some_collection': [('contains', 'apple')]
+    'some_collection': [('contains', 'apple')],
+    'not_a_name': [('alt', 'alt_name'), 'text', 'require']
 }
 
 dict_schema_data = {
     'email': 'petermelias@gmail.com',
     'some_number': '13',
-    'some_collection': ['orange', 'apple', 'monkey']
+    'some_collection': ['orange', 'apple', 'monkey'],
+    'alt_name': 'testing'
 }
 
 
@@ -58,11 +60,13 @@ def test_schema():
     assert_true(s.required_field.valid)
     assert_false(s.missing_field.valid)
     assert_false(s.match_me.valid)
-    assert_false(s.match_to_me.valid)
+    assert_true(s.match_to_me.valid)
     assert_false(s.not_a_good_match.valid)
 
     s = Schema(match=[('password', 'password_confirm')],
-               require=['field_one', 'field_two'], blank=['can_be_blank'])
+               require=['field_one', 'field_two'],
+               blank=['can_be_blank'],
+               strip_blank=False)
     s.password
     s.password_confirm
     s.field_one
@@ -90,20 +94,32 @@ def test_schema():
     s = Schema.from_dict(test_dict_schema)
     s.validate(dict_schema_data)
     assert_true(s.valid)
+    assert_equals(s.not_a_name.result, 'testing')
+    assert_equals(s.alt_name.result, 'testing')
+
+
+def test_alt_behavior():
+    sdict = {
+        'some_field': [('alt', 'alt_name'), 'require']
+    }
+    tdata = {
+        'alt_name': 'bob the builder'
+    }
+
+    s = Schema.from_dict(sdict)
+    s.validate(tdata)
 
 
 def test_field():
-    s = Schema('Test Schema')
-    s.second_field().alt('other_name').require()
+    s = Schema()
+    s.some_field.require()
+
     d = {
-        'other_name': 'Test Value A',
-        'second_field': 'Test Value B'
+        'some_field': 'Test Value B'
     }
+
     s.validate(d)
     assert_true(s.valid)
-    assert_equals(s.other_name.result, 'Test Value A')
-    # because this should not have been run twice
-    assert_equals(s.second_field.result, 'Test Value A')
     s.reset()
     assert_false(s.valid)
 
@@ -111,13 +127,12 @@ def test_field():
     s.validate(d)
     assert_false(s.valid)
 
-    assert_false(s.other_name.valid)
-    assert_false(s.second_field.valid)
-    assert_in('This field cannot be missing.', s.other_name.errors)
+    assert_false(s.some_field.valid)
+    assert_in('This field cannot be missing.', s.some_field.errors)
 
 
 def test_filter():
-    s = Schema('Test Schema')
+    s = Schema()
     s.first_name.text()
     s.last_name.text(min_len=1, max_len=10)
     d = {
@@ -136,4 +151,4 @@ def test_filter():
     }
     s.reset()
     s.validate(d)
-    assert_false(s.valid),
+    assert_false(s.valid)
