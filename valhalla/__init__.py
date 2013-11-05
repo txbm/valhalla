@@ -58,11 +58,12 @@ class Schema(object):
     @property
     def results(self):
         if self._field_options['strip_missing']:
-            r = {
-                name: filter_chain.result
-                for name, filter_chain in self._matched.iteritems()
-                if filter_chain.valid
-            }
+            r = {}
+            filters = self._matched.values()
+            for f in filters:
+                if f.valid:
+                    name = self._names_by_filters[f][0]
+                    r[name] = f.result
         else:
             r = {
                 names[0]: filter_chain.result
