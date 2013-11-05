@@ -301,7 +301,7 @@ class FilterChain(object):
                         self._value = f.run(self._value)
                 except ValidationError as e:
                     self._valid = False
-                    self._errors.append(e.message)
+                    self._errors.append(str(e))
                 else:
                     self._valid = True
 

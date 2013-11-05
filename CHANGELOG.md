@@ -1,6 +1,9 @@
 # Changelog
 current version: 0.1.1
 
+### v0.1.2
+* Uncovered and fixed a deprecation warning from 2.6
+
 ### v0.1.1
 * Changed the result printer so that it uses the "canonical name" always.
 
