@@ -7,7 +7,7 @@ from .. import ValidationError
 _regexes = {
     'word_notword_spaces': re.compile(r'[\w\W\s]*', re.IGNORECASE),
     'notword': re.compile(r'\W', re.IGNORECASE),
-    'punctuation': re.compile(r'[^\s\w\-]+', re.IGNORECASE),
+    'punctuation': re.compile(r'[^\s\w-]+', re.IGNORECASE),
     'alphanumeric': re.compile(r'[a-z\s\-_0-9]*', re.IGNORECASE),
     'alpha': re.compile(r'[a-z\s\-_]*', re.IGNORECASE),
     'numeric': re.compile(r'\d*', re.IGNORECASE),
@@ -105,6 +105,8 @@ def canonize(_value=None, *args, **kwargs):
 
 def slugify(_value=None, *args, **kwargs):
     _value = _regexes['punctuation'].sub('', _value)
+    _value = ' '.join(_value.split('-'))
+    _value = ' '.join(_value.split())
     _value = _regexes['notword'].sub('-', _value)
     return _value.lower()
 

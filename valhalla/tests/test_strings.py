@@ -20,6 +20,8 @@ def _sample_data():
         'lower_case': 'i am the quiet mouse',
         'noncanonical_string': 'THERE IS NOTHING-CANONICAL__ABOUTMEEEEEE333            see?',
         'notslugified': 'I AM NOT SLUGIFIED #@(#*@(#@ OMG PUNCTU3232...ATION    ---- who submits data like this anyway?',
+        'alsonotslugified': 'A / use / SLAS/SHES#@@// AND STUFFF-- - // // / \ 32~~ ~ / /',
+        'sluggingindempotency': 'already-slugged',
         'some_key': 'alpha',
         'some_nonexistent_key': 'charlie',
         'some_nonexistent_key_2': 'delta'
@@ -167,12 +169,19 @@ def test_canonize():
 def test_slugify():
     s = Schema()
     s.notslugified.slugify()
+    s.alsonotslugified.slugify()
+    s.sluggingindempotency.slugify()
 
     s.validate(_sample_data())
 
     assert_true(s.valid)
     assert_equals(s.notslugified.result,
-                  u'i-am-not-slugified--omg-punctu3232ation---------who-submits-data-like-this-anyway')
+                  u'i-am-not-slugified-omg-punctu3232ation-who-submits-data-like-this-anyway')
+
+    assert_equals(s.alsonotslugified.result, u'a-use-slasshes-and-stufff-32')
+    assert_equals(s.sluggingindempotency.result, u'already-slugged')
+
+    # assert_equals(s.alsonotslugified,u'')
 
 
 def test_key_lookup():

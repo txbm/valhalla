@@ -1,5 +1,9 @@
 # Changelog
-current version: 0.1.1
+current version: 0.1.3
+
+### v0.1.3
+* Fixed a problem with ```filters.strings.slugify``` that was causing the parser to insert double -- when certain punctuation was surrounded by spaces.
+* Ensured indempotency with ```filters.strings.slugify``` given new parser code.
 
 ### v0.1.2
 * Uncovered and fixed a deprecation warning from 2.6
