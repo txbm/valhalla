@@ -26,24 +26,30 @@ def strbool(_value=None, *args, **kwargs):
 
 
 def integer(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     try:
         return int(_value)
     except (ValueError, TypeError):
         raise ValidationError(
-            'The value %s cannot be converted to \
-            an integer.' % _value)
+            'The value %s cannot be converted to '
+            'an integer.' % _value)
 
 
 def longint(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     try:
         return long(_value)
     except ValueError:
         raise ValidationError(
-            'The value %s cannot be converted \
-            to a long integer.' % _value)
+            'The value %s cannot be converted '
+            'to a long integer.' % _value)
 
 
 def numeric(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     if float(_value).is_integer():
         return int(_value)
 
@@ -51,24 +57,30 @@ def numeric(_value=None, *args, **kwargs):
 
 
 def decimal(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     try:
         return Decimal(_value)
     except (ValueError, InvalidOperation):
         raise ValidationError(
-            'The specified value %s could not \
-            be casted to a Decimal' % _value)
+            'The specified value %s could not '
+            'be cast to a Decimal' % _value)
 
 
 def string(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     try:
         return unicode(_value)
     except ValueError:
         raise ValidationError(
-            'The specified value %s could not be \
-            casted to a unicode string' % _value)
+            'The specified value %s could not be '
+            'casted to a unicode string' % _value)
 
 
 def none(_value=None, *args, **kwargs):
+    if _value is None:
+        return _value
     none_list = [
         '',
         'none',

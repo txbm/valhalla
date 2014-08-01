@@ -59,7 +59,7 @@ def test_strbool():
 
 
 def test_integer():
-    s = Schema()
+    s = Schema(strip_blank=False)
     s.integer_value.integer()
     s.float_value.integer()
     s.not_integer.integer()
